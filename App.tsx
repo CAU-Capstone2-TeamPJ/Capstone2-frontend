@@ -1,131 +1,80 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { StyleSheet, View, Dimensions, Text } from 'react-native';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
+type Coordinate = {
+  latitude: number;
+  longitude: number;
   title: string;
-}>;
+};
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const coordinates: Coordinate[] = [
+  { latitude: 37.5665, longitude: 126.9780, title: '서울시청' },
+  { latitude: 37.5700, longitude: 126.9830, title: '경복궁' },
+  { latitude: 37.5765, longitude: 126.9850, title: '북촌한옥마을' },
+  { latitude: 37.5598, longitude: 126.9751, title: '남대문시장' },
+  { latitude: 37.5512, longitude: 126.9882, title: 'N서울타워' },
+  { latitude: 37.5640, longitude: 127.0010, title: '동대문디자인플라자' },
+];
+
+export default function App() {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 37.5665,
+          longitude: 126.9780,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+        zoomEnabled
+        zoomControlEnabled
+        showsUserLocation
+      >
+        {coordinates.map((coord, index) => (
+          <Marker
+            key={index}
+            coordinate={{
+              latitude: coord.latitude,
+              longitude: coord.longitude,
+            }}
+            title={coord.title} // ✅ 마커 눌렀을 때 장소 이름 팝업
+          >
+            <View style={styles.customMarker}>
+              <Text style={styles.markerText}>{index + 1}</Text>
+            </View>
+          </Marker>
+        ))}
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
-
-  return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+        <Polyline
+          coordinates={coordinates}
+          strokeWidth={4}
+          strokeColor="blue"
+        />
+      </MapView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    ...StyleSheet.absoluteFillObject,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  map: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  customMarker: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'blue',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
-  highlight: {
-    fontWeight: '700',
+  markerText: {
+    fontWeight: 'bold',
+    color: 'blue',
   },
 });
-
-export default App;
