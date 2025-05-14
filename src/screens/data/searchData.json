@@ -1,0 +1,28 @@
+{
+    "movies": [
+        {
+            "id": 1,
+            "title": "인셉션 1",
+            "year": 2010,
+            "poster": "https://ojsfile.ohmynews.com/PHT_IMG_FILE/2020/0813/IE002677702_PHT.jpg",
+            "likes": 1234,
+            "liked": false
+        },
+        {
+            "id": 2,
+            "title": "인셉션 2",
+            "year": 2008,
+            "poster": "https://ojsfile.ohmynews.com/PHT_IMG_FILE/2020/0813/IE002677703_PHT.jpg",
+            "likes": 567,
+            "liked": true
+        },
+        {
+            "id": 3,
+            "title": "인셉션 3",
+            "year": 2014,
+            "poster": "https://ojsfile.ohmynews.com/STD_IMG_FILE/2010/0720/IE001217898_STD.jpg",
+            "likes": 890,
+            "liked": false
+        }
+    ]
+}

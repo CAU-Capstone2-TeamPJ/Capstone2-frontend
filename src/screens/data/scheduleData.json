@@ -1,0 +1,143 @@
+{
+  "header": {
+    "id": 1234,
+    "country": "한국",
+    "concepts": ["힐링", "먹방"],
+    "period": 2
+  },
+  "schedule": [
+    {
+      "day": 1,
+      "locations": [
+        {
+          "id": 1,
+          "name": "도쿄 거리",
+          "address": "일본 도쿄",
+          "image": "https://t2.daumcdn.net/thumb/R720x0/?fname=http://t1.daumcdn.net/brunch/service/user/3yEW/image/uTwybT9pzj-tFieNR9bKZsSpw18.jpg",
+          "likes": 320,
+          "liked": false,
+          "comments": [
+            {
+              "id": "1",
+              "nickname": "길동",
+              "content": "정말 멋진 곳이에요! 다음에 꼭 다시 가고 싶네요.",
+              "images": ["https://previews.123rf.com/images/sepavo/sepavo1303/sepavo130300023/18328340-%EC%9D%BC%EB%B3%B8-%EB%8F%84%EC%BF%84%EC%97%90%EC%9E%88%EB%8A%94-%EB%8F%84%EC%BF%84-%ED%83%80%EC%9B%8C.jpg",
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4LKskm_qQ0u60pgz3fWiI1YRWp6oPVe8yDw&s"],
+              "likes": 10,
+              "liked": false,
+              "createdAt": "2025-05-14T12:30:00Z"
+            },
+            {
+              "id": "2",
+              "nickname": "영희",
+              "content": "여기 분위기가 너무 좋았어요! 사진 찍기에 완벽한 장소입니다.",
+              "images": ["https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Tokyo_Tower_M4854.jpg/330px-Tokyo_Tower_M4854.jpg"],
+              "likes": 5,
+              "liked": true,
+              "createdAt": "2025-05-13T15:45:00Z"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "파리 다리",
+          "address": "프랑스 파리",
+          "image": "https://i.namu.wiki/i/04Ka6t5vfcSOYlnIQTAB6BEJUNFHxlMOHayVm7YRHjEL_MA5HISe7cb1jnstCTmDqtHLQOt-y7-5xMabPUZEkQ.webp",
+          "likes": 540,
+          "liked": false,
+          "comments": [
+            {
+              "id": "3",
+              "nickname": "철수",
+              "content": "파리의 대표적인 명소! 이곳에서 보는 풍경은 정말 예술입니다.",
+              "images": [],
+              "likes": 15,
+              "liked": true,
+              "createdAt": "2025-05-12T10:00:00Z"
+            },
+            {
+              "id": "4",
+              "nickname": "민정",
+              "content": "전 세계에서 가장 아름다운 다리인 것 같아요!",
+              "images": ["https://via.placeholder.com/100"],
+              "likes": 20,
+              "liked": false,
+              "createdAt": "2025-05-11T18:00:00Z"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "서울역",
+          "address": "대한민국 서울",
+          "image": "https://i.namu.wiki/i/Med4Y5JV_FYjaX4ZaJlM-4n7IThVM0CeiJpec5uQBiLHP5i22o59nKZ-UzIYcisJ6bi1Qg3qlRYQhoc8cW0GoA.webp",
+          "likes": 540,
+          "liked": true,
+          "comments": [
+            {
+              "id": "5",
+              "nickname": "수지",
+              "content": "서울역은 정말 바쁜 곳인데, 그만큼 많은 사람들이 지나가네요. 흥미로운 곳이에요!",
+              "images": ["https://via.placeholder.com/100"],
+              "likes": 25,
+              "liked": false,
+              "createdAt": "2025-05-13T17:30:00Z"
+            },
+            {
+              "id": "6",
+              "nickname": "지현",
+              "content": "서울역 근처에 좋은 카페들도 많아서, 역 근처에서 시간을 보내기 좋네요.",
+              "images": [],
+              "likes": 10,
+              "liked": true,
+              "createdAt": "2025-05-12T14:15:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "locations": [
+        {
+          "id": 4,
+          "name": "경복궁",
+          "address": "대한민국 서울",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Gyeongbokgung_Palace.jpg/300px-Gyeongbokgung_Palace.jpg",
+          "likes": 210,
+          "liked": false,
+          "comments": [
+            {
+              "id": "7",
+              "nickname": "유진",
+              "content": "역사적인 장소, 정말 아름다워요!",
+              "images": ["https://via.placeholder.com/100"],
+              "likes": 15,
+              "liked": true,
+              "createdAt": "2025-05-14T09:00:00Z"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "한라산",
+          "address": "제주도, 한국",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Halla_San_Mountain_Jeju.jpg/300px-Halla_San_Mountain_Jeju.jpg",
+          "likes": 500,
+          "liked": true,
+          "comments": [
+            {
+              "id": "8",
+              "nickname": "민호",
+              "content": "정말 멋진 산! 하이킹하기 좋은 장소입니다.",
+              "images": [],
+              "likes": 30,
+              "liked": false,
+              "createdAt": "2025-05-13T16:30:00Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
