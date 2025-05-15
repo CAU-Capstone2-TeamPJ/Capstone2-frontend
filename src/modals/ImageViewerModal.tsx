@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 
 const {width, height} = Dimensions.get('window');
 
@@ -40,6 +41,12 @@ const ImageViewerModal: React.FC<Props> = ({
       onRequestClose={onClose}>
       <View style={styles.container}>
         <TouchableOpacity style={styles.overlay} onPress={onClose} />
+
+        {/* 우측 상단에 닫기 버튼 추가 */}
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Icon name="close" size={30} color="white" />
+        </TouchableOpacity>
+
         <FlatList
           ref={flatListRef}
           data={imageUris}
@@ -71,6 +78,12 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40, // 상단에서 40px 정도 떨어진 위치
+    right: 20, // 우측에서 20px 정도 떨어진 위치
+    zIndex: 1,
   },
   imageWrapper: {
     width,

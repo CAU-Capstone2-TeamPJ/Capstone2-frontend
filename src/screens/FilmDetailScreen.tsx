@@ -6,14 +6,13 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  TouchableWithoutFeedback,
   Button,
 } from 'react-native';
 import LikeButton from '../components/LikeButton';
 import movieData from './data/movieData.json';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
+import ImageViewerModal from '../modals/ImageViewerModal'; // ImageViewerModal 임포트
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FilmDetail'>;
 
@@ -55,7 +54,7 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
 
   return (
     <View style={styles.screen}>
-      {/*상단 헤더 */}
+      {/* 상단 헤더 */}
       <View style={styles.headerBar}>
         <TouchableOpacity
           style={styles.backButton}
@@ -102,33 +101,12 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
       />
 
       {/* 이미지 전체보기 모달 */}
-      <Modal
+      <ImageViewerModal
         visible={isImageModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={closeImageModal}>
-        <View style={styles.imageModalContainer}>
-          <TouchableWithoutFeedback onPress={closeImageModal}>
-            <View style={StyleSheet.absoluteFillObject} />
-          </TouchableWithoutFeedback>
-
-          <View style={styles.imageModalContent}>
-            {selectedImage && (
-              <Image
-                source={{uri: selectedImage}}
-                style={styles.fullScreenImage}
-                resizeMode="contain"
-              />
-            )}
-          </View>
-
-          <TouchableOpacity
-            onPress={closeImageModal}
-            style={styles.closeImageButton}>
-            <Text style={styles.closeImageButtonText}>×</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+        imageUris={film.stillCuts}
+        initialIndex={film.stillCuts.indexOf(selectedImage!)}
+        onClose={closeImageModal}
+      />
     </View>
   );
 };
@@ -172,32 +150,6 @@ const styles = StyleSheet.create({
     height: 100,
     marginRight: 5,
     borderRadius: 5,
-  },
-  imageModalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  imageModalContent: {
-    width: '95%',
-    height: '95%',
-    justifyContent: 'center',
-  },
-  fullScreenImage: {
-    width: '100%',
-    height: '100%',
-  },
-  closeImageButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    padding: 10,
-  },
-  closeImageButtonText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#fff',
   },
   headerBar: {
     flexDirection: 'row',

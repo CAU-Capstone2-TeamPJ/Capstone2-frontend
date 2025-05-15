@@ -11,9 +11,13 @@ import LocationList from '../components/LocationList';
 import LocationDetailModal from '../modals/LocationDetailModal';
 import scheduleData from './data/scheduleData.json';
 import {useNavigation} from '@react-navigation/native'; // ← 네비게이션 사용
+import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../App';
 
 const ScheduleScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [selectedDay, setSelectedDay] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
@@ -77,8 +81,9 @@ const ScheduleScreen: React.FC = () => {
         <TouchableOpacity
           onPress={() => {
             /* TODO: 지도 보기 화면 이동 */
+            navigation.navigate('Map');
           }}>
-          <Text style={styles.headerIcon}>🗺️</Text>
+          <Icon name="map" size={24} color="#007AFF" />
         </TouchableOpacity>
       </View>
 

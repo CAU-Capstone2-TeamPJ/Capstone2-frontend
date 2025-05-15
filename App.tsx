@@ -22,6 +22,7 @@ import ScheduleScreen from './src/screens/ScheduleScreen';
 import SearchScreen from './src/screens/SearchScreen';
 import LikeListScreen from './src/screens/LikeListScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import MapScreen from './src/screens/MapScreen';
 
 // 1. 타입 정의
 export type RootStackParamList = {
@@ -40,6 +41,7 @@ export type RootStackParamList = {
   };
   FilmDetail: {filmId: number};
   Schedule: undefined;
+  Map: undefined;
 };
 
 type MainTabsParamList = {
@@ -158,6 +160,11 @@ export default function App() {
         <Stack.Screen
           name="Schedule"
           component={ScheduleScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Map"
+          component={MapScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
