@@ -13,6 +13,7 @@ import movieData from './data/movieData.json';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import ImageViewerModal from '../modals/ImageViewerModal'; // ImageViewerModal 임포트
+import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FilmDetail'>;
 
@@ -59,7 +60,7 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>←</Text>
+          <Icon name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{film.title}</Text>
       </View>

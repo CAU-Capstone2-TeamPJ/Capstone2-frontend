@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
+import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Distance'>;
 
@@ -39,7 +40,12 @@ const DistanceSelectionScreen: React.FC<Props> = ({navigation, route}) => {
       {/* 상단 헤더 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <Icon
+            style={styles.backButton}
+            name="arrow-back"
+            size={24}
+            color="#007AFF"
+          />
         </TouchableOpacity>
         <Text style={styles.headerText}>2단계: 이동 거리 선택</Text>
       </View>

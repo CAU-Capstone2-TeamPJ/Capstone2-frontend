@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
+import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Country'>;
 
@@ -37,7 +38,12 @@ const CountrySelectionScreen = ({navigation, route}: Props) => {
       {/* 상단 헤더 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
+          <Icon
+            style={styles.backButton}
+            name="arrow-back"
+            size={24}
+            color="#007AFF"
+          />
         </TouchableOpacity>
         <Text style={styles.headerText}>1단계: 국가 선택</Text>
       </View>

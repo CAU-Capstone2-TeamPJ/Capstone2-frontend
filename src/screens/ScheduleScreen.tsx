@@ -75,7 +75,12 @@ const ScheduleScreen: React.FC = () => {
       {/* ✅ 상단 바 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.headerIcon}>←</Text>
+          <Icon
+            style={styles.headerIcon}
+            name="arrow-back"
+            size={24}
+            color="#007AFF"
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>여행 일정</Text>
         <TouchableOpacity
