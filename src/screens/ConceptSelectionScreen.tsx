@@ -37,13 +37,7 @@ const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
 
   const handleNext = () => {
     if (selectedConcepts.length > 0) {
-      navigation.navigate('Period', {
-        id,
-        country,
-        distance,
-        concepts: selectedConcepts,
-        period: mockResponse.period, // 서버 응답 기반
-      });
+      navigation.navigate('Schedule');
     }
   };
 
@@ -72,9 +66,6 @@ const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
         />
         <View
           style={[styles.progressStep, {flex: 1, backgroundColor: '#007AFF'}]}
-        />
-        <View
-          style={[styles.progressStep, {flex: 1, backgroundColor: '#eee'}]}
         />
       </View>
 

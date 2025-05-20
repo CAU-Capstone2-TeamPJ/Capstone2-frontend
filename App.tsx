@@ -28,7 +28,7 @@ import MapScreen from './src/screens/MapScreen';
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
-  Country: {countries: string[]; id: number; distance: number};
+  Country: undefined;
   Distance: {id: number; selectedCountry: string; distance: number};
   Concept: {id: number; country: string; distance: number};
   /* TODO: 컨셉 중간에 서버 리퀘있음!! 변경할수도 */
@@ -121,7 +121,7 @@ function MainTabs() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="MainTabs">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
           component={LoginScreen}

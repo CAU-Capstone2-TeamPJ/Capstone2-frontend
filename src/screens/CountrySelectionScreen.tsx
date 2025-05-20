@@ -14,7 +14,19 @@ import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 type Props = NativeStackScreenProps<RootStackParamList, 'Country'>;
 
 const CountrySelectionScreen = ({navigation, route}: Props) => {
-  const {countries, id, distance} = route.params;
+  // const {countries, id, distance} = {route.params};
+  const countries = [
+    '한국',
+    '일본',
+    '미국',
+    '영국',
+    '프랑스',
+    '독일',
+    '이탈리아',
+  ];
+  const id = 1;
+  const distance = 15;
+
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,7 +69,7 @@ const CountrySelectionScreen = ({navigation, route}: Props) => {
           style={[styles.progressStep, {flex: 1, backgroundColor: '#eee'}]}
         />
         <View
-          style={[styles.progressStep, {flex: 2, backgroundColor: '#eee'}]}
+          style={[styles.progressStep, {flex: 1, backgroundColor: '#eee'}]}
         />
       </View>
 

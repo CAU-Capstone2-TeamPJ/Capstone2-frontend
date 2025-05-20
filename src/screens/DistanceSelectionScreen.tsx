@@ -59,7 +59,7 @@ const DistanceSelectionScreen: React.FC<Props> = ({navigation, route}) => {
           style={[styles.progressStep, {flex: 1, backgroundColor: '#007AFF'}]}
         />
         <View
-          style={[styles.progressStep, {flex: 2, backgroundColor: '#eee'}]}
+          style={[styles.progressStep, {flex: 1, backgroundColor: '#eee'}]}
         />
       </View>
 

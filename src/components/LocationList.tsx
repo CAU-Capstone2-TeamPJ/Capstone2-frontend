@@ -3,36 +3,25 @@ import {ScrollView, Text, View, StyleSheet} from 'react-native';
 import LocationCard from './LocationCard';
 
 interface Location {
-  id: number;
-  name: string;
+  locationId: number;
+  locationName: string;
   address: string;
   image: string;
-  likes: number;
-  liked: boolean;
 }
 
 interface LocationListProps {
   locations: Location[];
   onPress: (location: any) => void; // 클릭 시 이벤트 핸들러
-  onToggleLike: (id: number) => void; // 좋아요 상태 토글 핸들러
 }
 
-const LocationList: React.FC<LocationListProps> = ({
-  locations,
-  onPress,
-  onToggleLike,
-}) => {
+const LocationList: React.FC<LocationListProps> = ({locations, onPress}) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {locations.map((location, index) => (
-          <View key={location.id} style={styles.locationContainer}>
+          <View key={location.locationId} style={styles.locationContainer}>
             <Text style={styles.indexText}>{index + 1}번째 장소</Text>
-            <LocationCard
-              location={location}
-              onPress={onPress}
-              onToggleLike={onToggleLike}
-            />
+            <LocationCard location={location} onPress={onPress} />
           </View>
         ))}
       </ScrollView>

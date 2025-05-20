@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import LocationList from '../components/LocationList';
-import LocationDetailModal from '../modals/LocationDetailModal';
-import scheduleData from './data/scheduleData.json';
-import {useNavigation} from '@react-navigation/native'; // ← 네비게이션 사용
+import LocationList from '../components/LocationList'; // 수정된 LocationList 컴포넌트
+import LocationDetailModal from '../modals/LocationDetailModal'; // 장소 상세 모달
+import scheduleData from './data/scheduleData.json'; // 수정된 데이터 구조
+import {useNavigation} from '@react-navigation/native'; // 네비게이션 사용
 import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
@@ -18,46 +18,16 @@ import {RootStackParamList} from '../../App';
 const ScheduleScreen: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [selectedDay, setSelectedDay] = useState(0);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [selectedDay, setSelectedDay] = useState(0); // 선택된 날
+  const [isModalVisible, setIsModalVisible] = useState(false); // 모달 표시 상태
+  const [selectedLocation, setSelectedLocation] = useState<any>(null); // 선택된 장소
 
-  const [schedule, setSchedule] = useState(scheduleData.schedule);
-  const {period} = scheduleData.header;
-  const [isLiking, setIsLiking] = useState(false);
+  const [schedule, setSchedule] = useState(scheduleData.dailyRoutes); // 수정된 데이터 구조에 맞춰 dailyRoutes로 변경
+  const {totalDays} = scheduleData; // 총 일정일 수
 
+  // 각 날짜에 해당하는 장소들 반환
   const locationsByDay = (day: number) => {
     return schedule[day].locations;
-  };
-
-  const handleToggleLike = async (id: number) => {
-    if (isLiking) return; // 이미 처리 중이면 무시
-    setIsLiking(true);
-
-    try {
-      const updatedSchedule = schedule.map(day => {
-        const updatedLocations = day.locations.map(location => {
-          if (location.id === id) {
-            return {
-              ...location,
-              liked: !location.liked,
-              likes: location.liked ? location.likes - 1 : location.likes + 1,
-            };
-          }
-          return location;
-        });
-        return {...day, locations: updatedLocations};
-      });
-
-      setSchedule(updatedSchedule);
-
-      // 👇 실제 서버 요청이 있다면 여기에 API 호출
-      // await api.post('/like-toggle', { id });
-    } catch (error) {
-      console.error('좋아요 토글 실패:', error);
-    } finally {
-      setIsLiking(false);
-    }
   };
 
   const openModal = (location: any) => {
@@ -70,9 +40,53 @@ const ScheduleScreen: React.FC = () => {
     setSelectedLocation(null);
   };
 
+  // 더미 데이터를 사용한 일정 생성 (fetch 예시)
+  const createSchedule = async () => {
+    // 아래는 실제 API 호출로 변경해야 합니다.
+    try {
+      // 더미 데이터로 일정을 생성
+      const newSchedule = {
+        ...scheduleData,
+        planName: '새로운 여행 일정',
+        savedPlanId: 12345, // 더미 ID
+      };
+
+      setSchedule(newSchedule.dailyRoutes);
+
+      // TODO: 일정 생성 후 서버에 API 요청 (아래는 예시)
+      /*
+      const response = await fetch('https://api.example.com/createSchedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planName: newSchedule.planName,
+          dailyRoutes: newSchedule.dailyRoutes,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('일정 생성 실패');
+      }
+
+      const data = await response.json();
+      console.log('일정 생성 성공:', data);
+      */
+    } catch (error) {
+      console.error('일정 생성 실패:', error);
+    }
+  };
+
+  // 초기화 또는 더미 데이터를 사용해 화면을 로드
+  useEffect(() => {
+    // 더미 데이터 사용, 실제로는 서버에서 데이터를 불러오는 코드로 변경
+    createSchedule();
+  }, []);
+
   return (
     <View style={styles.container}>
-      {/* ✅ 상단 바 */}
+      {/* 상단 바 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon
@@ -85,7 +99,7 @@ const ScheduleScreen: React.FC = () => {
         <Text style={styles.headerTitle}>여행 일정</Text>
         <TouchableOpacity
           onPress={() => {
-            /* TODO: 지도 보기 화면 이동 */
+            // 지도 보기 화면 이동
             navigation.navigate('Map');
           }}>
           <Icon name="map" size={24} color="#007AFF" />
@@ -94,7 +108,7 @@ const ScheduleScreen: React.FC = () => {
 
       {/* 탭 */}
       <View style={styles.tabs}>
-        {Array.from({length: period}).map((_, index) => (
+        {Array.from({length: totalDays}).map((_, index) => (
           <TouchableOpacity
             key={index}
             style={[styles.tab, selectedDay === index && styles.selectedTab]}
@@ -105,13 +119,12 @@ const ScheduleScreen: React.FC = () => {
       </View>
 
       {/* 장소 목록 */}
-      <ScrollView style={styles.content}>
+      {/*      <ScrollView style={styles.content}>
         <LocationList
-          locations={locationsByDay(selectedDay)}
-          onPress={openModal}
-          onToggleLike={handleToggleLike}
+          locations={locationsByDay(selectedDay)} // 선택된 날짜의 장소들
+          onPress={openModal} // 장소 클릭 시 모달 열기
         />
-      </ScrollView>
+      </ScrollView>*/}
 
       {/* 하단 저장 버튼 */}
       <TouchableOpacity style={styles.saveButton}>
@@ -119,12 +132,11 @@ const ScheduleScreen: React.FC = () => {
       </TouchableOpacity>
 
       {/* 장소 상세 모달 */}
-      <LocationDetailModal
+      {/*      <LocationDetailModal
         visible={isModalVisible}
         location={selectedLocation}
         onClose={closeModal}
-        onToggleLike={handleToggleLike}
-      />
+      />*/}
     </View>
   );
 };
