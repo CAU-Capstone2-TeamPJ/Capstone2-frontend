@@ -47,3 +47,40 @@ export const getFilmData = async (id: number) => {
     throw error;
   }
 };
+
+export const createTravelPlan = async (
+  movieId: number,
+  country: string,
+  travelHours: number,
+  concepts: string[],
+  originLat: number,
+  originLng: number,
+) => {
+  try {
+    const response = await fetch(`${URL}/trip-plans`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: '*/*',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({
+        movieId,
+        country,
+        travelHours,
+        concepts,
+        originLat,
+        originLng,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('서버 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};

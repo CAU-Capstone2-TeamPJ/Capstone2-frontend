@@ -42,7 +42,7 @@ interface Film {
   images: FImage[];
   isLiked: boolean;
   likesCount: number;
-  // TODO: 이후 국가 목록 추가
+  filmingCountries: string[];
 }
 
 const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
@@ -85,8 +85,13 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   const handleCreateTravelPlan = () => {
-    navigation.navigate('Country', {movieId: filmId, countries: ['미국']});
-    // TODO: API 연동 후 국가 목록을 가져와야 함
+    if (!film) return; // film이 null이면 아무 동작도 하지 않음
+
+    navigation.navigate('Country', {
+      movieId: filmId,
+      countries: film.filmingCountries,
+    });
+
     console.log('여행 경로 만들기');
   };
 
@@ -161,8 +166,13 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
         </ScrollView>
 
         <TouchableOpacity
-          style={styles.travelButton}
-          onPress={handleCreateTravelPlan}>
+          style={[
+            styles.travelButton,
+            !film && {backgroundColor: '#ccc'}, // 비활성화 스타일
+          ]}
+          onPress={handleCreateTravelPlan}
+          disabled={!film} // film이 없으면 비활성화
+        >
           <Text style={styles.travelButtonText}>여행 경로 만들기</Text>
         </TouchableOpacity>
       </ScrollView>

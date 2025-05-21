@@ -38,6 +38,8 @@ export type RootStackParamList = {
     country: string;
     travelHours: number;
     concepts: string[];
+    originLat: number;
+    originLng: number;
   };
   Map: undefined;
 };

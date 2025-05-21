@@ -33,6 +33,8 @@ const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
         country,
         travelHours,
         concepts: selectedConcepts,
+        originLat: 126.956011,
+        originLng: 37.503757,
       });
     }
   };
