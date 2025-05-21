@@ -14,16 +14,7 @@ import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 type Props = NativeStackScreenProps<RootStackParamList, 'Concept'>;
 
 const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
-  const {id, country, distance} = route.params;
-
-  // 서버에서 받아온다고 가정한 더미 응답
-  const mockResponse = {
-    id,
-    country,
-    distance,
-    concepts: ['힐링', '먹방', '포토 스팟', '자연과 함께'],
-    period: 4,
-  };
+  const {movieId, country, travelHours} = route.params;
 
   const [selectedConcepts, setSelectedConcepts] = useState<string[]>([]);
 
@@ -37,7 +28,12 @@ const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
 
   const handleNext = () => {
     if (selectedConcepts.length > 0) {
-      navigation.navigate('Schedule');
+      navigation.navigate('Schedule', {
+        movieId,
+        country,
+        travelHours,
+        concepts: selectedConcepts,
+      });
     }
   };
 
@@ -74,7 +70,12 @@ const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
 
       {/* 컨셉 버튼 */}
       <ScrollView contentContainerStyle={styles.buttonsContainer}>
-        {mockResponse.concepts.map(concept => (
+        {[
+          '마음이 쉬어가는 곳',
+          '손에 담는 기쁨',
+          '시간이 담긴 이야기',
+          '몸으로 느끼는 즐거움',
+        ].map(concept => (
           <TouchableOpacity
             key={concept}
             style={[

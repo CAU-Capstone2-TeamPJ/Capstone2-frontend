@@ -15,7 +15,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FilmDetailScreen from './src/screens/FilmDetailScreen';
 import CountrySelectionScreen from './src/screens/CountrySelectionScreen';
-import DistanceSelectionScreen from './src/screens/DistanceSelectionScreen';
+import DistanceSelectionScreen from './src/screens/TravelHoursSelectionScreen';
 import ConceptSelectionScreen from './src/screens/ConceptSelectionScreen';
 import PeriodSelectionScreen from './src/screens/PeriodSelectionScreen';
 import ScheduleScreen from './src/screens/ScheduleScreen';
@@ -23,24 +23,22 @@ import SearchScreen from './src/screens/SearchScreen';
 import LikeListScreen from './src/screens/LikeListScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import MapScreen from './src/screens/MapScreen';
+import TravelHoursSelectionScreen from './src/screens/TravelHoursSelectionScreen';
 
 // 1. 타입 정의
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
-  Country: undefined;
-  Distance: {id: number; selectedCountry: string; distance: number};
-  Concept: {id: number; country: string; distance: number};
-  /* TODO: 컨셉 중간에 서버 리퀘있음!! 변경할수도 */
-  Period: {
-    id: number;
-    country: string;
-    distance: number;
-    concepts: string[];
-    period: number;
-  };
   FilmDetail: {filmId: number};
-  Schedule: undefined;
+  Country: {movieId: number; countries: string[]};
+  TravelHours: {movieId: number; country: string};
+  Concept: {movieId: number; country: string; travelHours: number};
+  Schedule: {
+    movieId: number;
+    country: string;
+    travelHours: number;
+    concepts: string[];
+  };
   Map: undefined;
 };
 
@@ -121,7 +119,7 @@ function MainTabs() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="MainTabs">
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -143,18 +141,13 @@ export default function App() {
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="Distance"
-          component={DistanceSelectionScreen}
+          name="TravelHours"
+          component={TravelHoursSelectionScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen
           name="Concept"
           component={ConceptSelectionScreen}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="Period"
-          component={PeriodSelectionScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen

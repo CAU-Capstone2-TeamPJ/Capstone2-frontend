@@ -14,20 +14,9 @@ import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 type Props = NativeStackScreenProps<RootStackParamList, 'Country'>;
 
 const CountrySelectionScreen = ({navigation, route}: Props) => {
-  // const {countries, id, distance} = {route.params};
-  const countries = [
-    '한국',
-    '일본',
-    '미국',
-    '영국',
-    '프랑스',
-    '독일',
-    '이탈리아',
-  ];
-  const id = 1;
-  const distance = 15;
+  const {movieId, countries} = route.params;
 
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [country, setSelectedCountry] = useState<string | null>(null);
 
   useEffect(() => {
     if (countries.length === 1) {
@@ -36,11 +25,10 @@ const CountrySelectionScreen = ({navigation, route}: Props) => {
   }, [countries]);
 
   const handleNext = () => {
-    if (selectedCountry) {
-      navigation.navigate('Distance', {
-        id,
-        selectedCountry,
-        distance,
+    if (country) {
+      navigation.navigate('TravelHours', {
+        movieId,
+        country,
       });
     }
   };
@@ -83,13 +71,13 @@ const CountrySelectionScreen = ({navigation, route}: Props) => {
             key={country}
             style={[
               styles.selectButton,
-              selectedCountry === country && styles.selectedButton,
+              country === country && styles.selectedButton,
             ]}
             onPress={() => setSelectedCountry(country)}>
             <Text
               style={[
                 styles.buttonText,
-                selectedCountry === country && styles.selectedText,
+                country === country && styles.selectedText,
               ]}>
               {country}
             </Text>
@@ -99,12 +87,9 @@ const CountrySelectionScreen = ({navigation, route}: Props) => {
 
       {/* 다음 버튼 */}
       <TouchableOpacity
-        style={[
-          styles.nextButton,
-          selectedCountry === null && styles.disabledButton,
-        ]}
+        style={[styles.nextButton, country === null && styles.disabledButton]}
         onPress={handleNext}
-        disabled={selectedCountry === null}>
+        disabled={country === null}>
         <Text style={styles.nextButtonText}>다음</Text>
       </TouchableOpacity>
     </SafeAreaView>

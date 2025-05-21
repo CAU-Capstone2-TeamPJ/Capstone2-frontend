@@ -9,28 +9,22 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
-import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
+import Icon from 'react-native-vector-icons/Ionicons';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Distance'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'TravelHours'>;
 
-const DistanceSelectionScreen: React.FC<Props> = ({navigation, route}) => {
-  const {id, selectedCountry, distance} = route.params;
-  const [selectedDistance, setSelectedDistance] = useState<number | null>(null);
+const TravelHoursSelectionScreen: React.FC<Props> = ({navigation, route}) => {
+  const {movieId, country} = route.params;
+  const [selectedHours, setSelectedHours] = useState<number | null>(null);
 
-  const distanceOptions = Array.from(
-    {length: distance},
-    (_, index) => index + 1,
-  );
+  const travelHoursOptions = Array.from({length: 9}, (_, i) => i + 2); // 2~10
 
   const handleNext = () => {
-    if (selectedDistance !== null) {
-      // ⚠️ 서버 연동 시 주석 해제
-      // const response = await fetch('https://api.example.com/next-step', {
-      //   method: 'POST'
+    if (selectedHours !== null) {
       navigation.navigate('Concept', {
-        id,
-        country: selectedCountry,
-        distance: selectedDistance,
+        movieId,
+        country,
+        travelHours: selectedHours,
       });
     }
   };
@@ -47,7 +41,7 @@ const DistanceSelectionScreen: React.FC<Props> = ({navigation, route}) => {
             color="#007AFF"
           />
         </TouchableOpacity>
-        <Text style={styles.headerText}>2단계: 이동 거리 선택</Text>
+        <Text style={styles.headerText}>2단계: 여행 시간 선택</Text>
       </View>
 
       {/* 진행 바 */}
@@ -64,24 +58,24 @@ const DistanceSelectionScreen: React.FC<Props> = ({navigation, route}) => {
       </View>
 
       {/* 안내 문구 */}
-      <Text style={styles.prompt}>최대 이동 거리를 선택해주세요!</Text>
+      <Text style={styles.prompt}>여행 시간을 선택해주세요 (단위: 시간)</Text>
 
-      {/* 거리 선택 버튼 */}
+      {/* 시간 선택 버튼 */}
       <ScrollView contentContainerStyle={styles.buttonsContainer}>
-        {distanceOptions.map(option => (
+        {travelHoursOptions.map(option => (
           <TouchableOpacity
             key={option}
             style={[
-              styles.distanceButton,
-              selectedDistance === option && styles.selectedButton,
+              styles.timeButton,
+              selectedHours === option && styles.selectedButton,
             ]}
-            onPress={() => setSelectedDistance(option)}>
+            onPress={() => setSelectedHours(option)}>
             <Text
               style={[
                 styles.buttonText,
-                selectedDistance === option && styles.selectedText,
+                selectedHours === option && styles.selectedText,
               ]}>
-              {option}
+              {option}시간
             </Text>
           </TouchableOpacity>
         ))}
@@ -91,17 +85,17 @@ const DistanceSelectionScreen: React.FC<Props> = ({navigation, route}) => {
       <TouchableOpacity
         style={[
           styles.nextButton,
-          selectedDistance === null && styles.disabledButton,
+          selectedHours === null && styles.disabledButton,
         ]}
         onPress={handleNext}
-        disabled={selectedDistance === null}>
+        disabled={selectedHours === null}>
         <Text style={styles.nextButtonText}>다음</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
-export default DistanceSelectionScreen;
+export default TravelHoursSelectionScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -142,7 +136,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 30,
   },
-  distanceButton: {
+  timeButton: {
     width: '100%',
     paddingVertical: 12,
     borderRadius: 8,

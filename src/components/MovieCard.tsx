@@ -28,7 +28,7 @@ const MovieCard: React.FC<Props> = ({
       />
       <View style={styles.info}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.year}>{release_date}</Text>
+        <Text style={styles.year}>{new Date(release_date).getFullYear()}</Text>
         <Text style={styles.likes}>👍 {vote_count}</Text>
         <Text style={styles.rating}>⭐ {vote_average}</Text>
       </View>

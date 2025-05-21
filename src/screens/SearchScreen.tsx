@@ -13,6 +13,7 @@ import MovieCard from '../components/MovieCard';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
+import {searchFilm} from '../api/api';
 
 // Movie 타입 정의
 interface Movie {
@@ -24,53 +25,9 @@ interface Movie {
   vote_average: number; // 평점
 }
 
-// 더미 데이터 (영화 목록)
-const dummyData: Movie[] = [
-  {
-    id: 496243,
-    title: '기생충',
-    release_date: '2019-05-30',
-    poster_path: '/mSi0gskYpmf1FbXngM37s2HppXh.jpg',
-    vote_count: 19038,
-    vote_average: 8.5,
-  },
-  {
-    id: 523077,
-    title: '마약기생충',
-    release_date: '2019-08-29',
-    poster_path: '/9imivrXa2EPW1WfnIGgN7oZtyoA.jpg',
-    vote_count: 319,
-    vote_average: 5.4,
-  },
-  {
-    id: 709589,
-    title: '사랑하는 기생충',
-    release_date: '2021-11-12',
-    poster_path: '/7InrCxOgYgqpA9hUTF9xDk6jHJZ.jpg',
-    vote_count: 14,
-    vote_average: 6.9,
-  },
-  {
-    id: 1043106,
-    title: '기생충 Challenge 더블업 우주소녀',
-    release_date: '2022-10-06',
-    poster_path: '/q8Zu3HqkrpxJcmatpiBDYHT71X0.jpg',
-    vote_count: 1,
-    vote_average: 10,
-  },
-  {
-    id: 48311,
-    title: '패러사이트',
-    release_date: '1982-03-12',
-    poster_path: '/4DGPORlVIDIQvsuSDnM4uXKMjWS.jpg',
-    vote_count: 75,
-    vote_average: 4.8,
-  },
-];
-
 const SearchScreen: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [movies, setMovies] = useState(dummyData);
+  const [movies, setMovies] = useState<Movie[]>([]); // 초기값을 빈 배열로 설정
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -80,30 +37,19 @@ const SearchScreen: React.FC = () => {
     movie.title.toLowerCase().includes(query.toLowerCase()),
   );
 
-  // 서버 요청을 보낼 함수 (주석처리)
-  const fetchMovies = async (query: string) => {
-    try {
-      const response = await fetch(
-        `https://api.example.com/search?query=${query}`,
-      );
-      const data = await response.json();
-      setMovies(data.movies); // 서버에서 받은 영화 목록
-    } catch (error) {
-      console.error('Error fetching movies:', error);
-    }
-  };
-
   // 검색 아이콘 클릭 시 호출되는 함수
-  const handleSearchIconClick = () => {
+  const handleSearchIconClick = async () => {
     if (query) {
-      fetchMovies(query); // 아이콘 클릭 시 쿼리로 서버 요청
+      const data = await searchFilm(query);
+      setMovies(data);
     }
   };
 
   // Enter 키를 눌렀을 때 호출되는 함수
-  const handleSubmitEditing = () => {
+  const handleSubmitEditing = async () => {
     if (query) {
-      fetchMovies(query); // Enter 키 입력 시 쿼리로 서버 요청
+      const data = await searchFilm(query);
+      setMovies(data);
     }
   };
 
