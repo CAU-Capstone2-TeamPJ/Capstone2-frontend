@@ -41,7 +41,16 @@ export type RootStackParamList = {
     originLat: number;
     originLng: number;
   };
-  Map: undefined;
+  Map: {
+    events: {
+      date: string;
+      places: {
+        latitude: number;
+        longitude: number;
+        title: string;
+      }[];
+    }[];
+  };
 };
 
 type MainTabsParamList = {

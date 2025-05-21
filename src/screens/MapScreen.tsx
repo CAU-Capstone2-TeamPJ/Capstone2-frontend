@@ -14,35 +14,32 @@ import SideSheet from '../components/SideSheet';
 import {RootStackParamList} from '../../App';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 
-const events = [
-  {
-    date: '1일차',
-    places: [
-      {latitude: 37.5665, longitude: 126.978, title: '서울시청'},
-      {latitude: 37.57, longitude: 126.983, title: '경복궁'},
-    ],
-  },
-  {
-    date: '2일차',
-    places: [
-      {latitude: 37.5765, longitude: 126.985, title: '북촌한옥마을'},
-      {latitude: 37.5598, longitude: 126.9751, title: '남대문시장'},
-    ],
-  },
-];
-
 type Props = NativeStackScreenProps<RootStackParamList, 'Map'>;
 
-const MapScreen: React.FC<Props> = ({navigation}) => {
-  const [selectedDate, setSelectedDate] = useState<string>('1일차');
+interface EventPlace {
+  latitude: number;
+  longitude: number;
+  title: string;
+}
+
+interface EventDay {
+  date: string;
+  places: EventPlace[];
+}
+
+const MapScreen: React.FC<Props> = ({navigation, route}) => {
+  const {events} = route.params; // 👈 props로 events 받아오기
+  const [selectedDate, setSelectedDate] = useState(events[0]?.date || '');
   const [sideVisible, setSideVisible] = useState(false);
   const mapRef = useRef<MapView>(null);
+  const firstPlace = events[0]?.places[0];
 
   const selectedEvents = events.find(event => event.date === selectedDate) || {
     places: [],
   };
 
   useEffect(() => {
+    // 최초 진입 시 위치 보정
     if (selectedEvents.places.length > 0) {
       const coords = selectedEvents.places.map(p => ({
         latitude: p.latitude,
@@ -50,7 +47,7 @@ const MapScreen: React.FC<Props> = ({navigation}) => {
       }));
       mapRef.current?.fitToCoordinates(coords, {
         edgePadding: {top: 50, right: 50, bottom: 50, left: 50},
-        animated: true,
+        animated: false,
       });
     }
   }, [selectedDate]);
@@ -66,12 +63,21 @@ const MapScreen: React.FC<Props> = ({navigation}) => {
         <MapView
           ref={mapRef}
           style={styles.map}
-          initialRegion={{
-            latitude: 37.5665,
-            longitude: 126.978,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
+          initialRegion={
+            firstPlace
+              ? {
+                  latitude: firstPlace.latitude,
+                  longitude: firstPlace.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }
+              : {
+                  latitude: 37.5665,
+                  longitude: 126.978,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.05,
+                }
+          }
           showsUserLocation
           zoomEnabled
           zoomControlEnabled>

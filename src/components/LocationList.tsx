@@ -6,7 +6,9 @@ interface Location {
   locationId: number;
   locationName: string;
   address: string;
-  image: string;
+  images: string[];
+  recommendationKeywords: string[];
+  concept: string;
 }
 
 interface LocationListProps {

@@ -6,16 +6,36 @@ interface LocationCardProps {
   onPress: (location: any) => void;
 }
 
+function extractPhotoReferenceFromUrl(url: string): string | null {
+  const photoRefKey = 'photo_reference=';
+  const keyParam = '&key=';
+
+  const startIndex = url.indexOf(photoRefKey);
+  const endIndex = url.indexOf(keyParam);
+
+  if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) {
+    return null; // 필수 파라미터가 없거나 순서가 잘못된 경우
+  }
+
+  const photoRef = url.substring(startIndex + photoRefKey.length, endIndex);
+  const newUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${photoRef}&key=AIzaSyD3xTB3LouXLK652qAPKYll2rhuwZEaMHo`;
+
+  console.log('Extracted:', newUrl);
+  return newUrl;
+}
+
 const LocationCard: React.FC<LocationCardProps> = ({location, onPress}) => {
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(location)}>
-      <Image source={{uri: location.image}} style={styles.image} />
+      <Image
+        source={{
+          uri: `${extractPhotoReferenceFromUrl(location.images[1])}`,
+        }}
+        style={styles.image}
+      />
       <View style={styles.info}>
         <Text style={styles.name}>{location.locationName}</Text>
         <Text style={styles.address}>{location.address}</Text>
-        <Text style={styles.keywords}>
-          추천 키워드: {location.recommendationKeywords.join(', ')}
-        </Text>
         <Text style={styles.concept}>{location.concept}</Text>
       </View>
     </TouchableOpacity>

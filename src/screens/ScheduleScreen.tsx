@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import LocationList from '../components/LocationList'; // 수정된 LocationList 컴포넌트
 import LocationDetailModal from '../modals/LocationDetailModal'; // 장소 상세 모달
-import scheduleData from './data/scheduleData.json'; // 수정된 데이터 구조
 import {useNavigation} from '@react-navigation/native'; // 네비게이션 사용
 import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
 import {
@@ -21,7 +20,19 @@ import {createTravelPlan} from '../api/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Schedule'>;
 
-// ...기존 import와 선언 부분은 그대로 유지
+interface Location {
+  locationId: number;
+  locationName: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  visitOrder: number;
+  travelTimeToNext: number;
+  travelDistanceToNext: number;
+  recommendationKeywords: string[];
+  concept: string;
+  images: string[];
+}
 
 const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
   const {movieId, country, travelHours, concepts, originLat, originLng} =
@@ -29,7 +40,7 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
 
   const [selectedDay, setSelectedDay] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location>();
 
   const [schedule, setSchedule] = useState<any[]>([]);
   const [totalDays, setTotalDays] = useState<number>(0);
@@ -41,10 +52,8 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
 
   const closeModal = () => {
     setIsModalVisible(false);
-    setSelectedLocation(null);
   };
 
-  // ✅ 서버 데이터로 일정 생성
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
@@ -73,6 +82,19 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
     return schedule[day]?.locations || [];
   };
 
+  const goToMapScreen = () => {
+    const formattedEvents = schedule.map((day, index) => ({
+      date: `${index + 1}일차`,
+      places: day.locations.map((loc: Location) => ({
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        title: loc.locationName,
+      })),
+    }));
+
+    navigation.navigate('Map', {events: formattedEvents});
+  };
+
   return (
     <View style={styles.container}>
       {/* 상단 바 */}
@@ -86,7 +108,7 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>여행 일정</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Map')}>
+        <TouchableOpacity onPress={() => goToMapScreen()}>
           <Icon name="map" size={24} color="#007AFF" />
         </TouchableOpacity>
       </View>
@@ -117,14 +139,13 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
       </TouchableOpacity>
 
       {/* 장소 상세 모달 */}
-      <LocationDetailModal
-        visible={isModalVisible}
-        location={selectedLocation}
-        onClose={closeModal}
-        onToggleLike={function (id: number): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
+      {selectedLocation && (
+        <LocationDetailModal
+          visible={isModalVisible}
+          id={selectedLocation.locationId}
+          onClose={closeModal}
+        />
+      )}
     </View>
   );
 };

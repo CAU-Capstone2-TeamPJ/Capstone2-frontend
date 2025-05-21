@@ -48,6 +48,27 @@ export const getFilmData = async (id: number) => {
   }
 };
 
+export const getLocationData = async (id: number) => {
+  try {
+    const response = await fetch(`${URL}/filming-locations/${id}`, {
+      method: 'GET',
+      headers: {
+        Accept: '*/*',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('서버 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
 export const createTravelPlan = async (
   movieId: number,
   country: string,

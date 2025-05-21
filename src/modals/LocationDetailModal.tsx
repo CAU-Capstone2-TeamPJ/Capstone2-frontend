@@ -7,99 +7,148 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
-import LikeButton from '../components/LikeButton';
-import CommentItem from '../components/CommentItem';
+import {getLocationData} from '../api/api';
+import {WebView} from 'react-native-webview';
 
 interface LocationDetailModalProps {
   visible: boolean;
-  location: any;
+  id: number | null;
   onClose: () => void;
-  onToggleLike: (id: number) => void; // ScheduleScreen과의 동기화를 위한 콜백
 }
 
 const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   visible,
-  location,
+  id,
   onClose,
-  onToggleLike,
 }) => {
-  const [comments, setComments] = useState<any[]>([]);
-  const [likeState, setLikeState] = useState({likes: 0, liked: false});
+  const [location, setLocation] = useState<any>(null);
+  const [webViewVisible, setWebViewVisible] = useState(false); // 웹뷰 모달 visible 상태
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null); // 선택된 장소 ID
+
+  const validNearbyKeywords = location?.nearbyKeywords?.filter(
+    (kw: string) => kw?.trim() !== '',
+  );
 
   useEffect(() => {
-    if (location) {
-      setComments(location.comments || []);
-      setLikeState({
-        likes: location.likes,
-        liked: location.liked,
-      });
+    if (id !== null) {
+      (async () => {
+        try {
+          const data = await getLocationData(id);
+          setLocation(data);
+        } catch (error) {
+          console.error('Error fetching location data:', error);
+        }
+      })();
     }
-  }, [location]);
+  }, [id]);
 
-  const handleToggleLocationLike = () => {
-    setLikeState(prev => ({
-      liked: !prev.liked,
-      likes: prev.liked ? prev.likes - 1 : prev.likes + 1,
-    }));
-
-    // 부모에도 알려서 전체 일정에 반영
-    if (location?.id) {
-      onToggleLike(location.id);
+  const handleKeywordPress = (keyword: string) => {
+    // 키워드에 맞는 placeId들을 가져옴
+    const placeIds = location?.nearbyPlaceIds?.[keyword]?.split(',') || [];
+    if (placeIds.length > 0) {
+      setSelectedPlaceId(placeIds[0]); // 첫 번째 장소 ID 선택
+      setWebViewVisible(true); // 웹뷰 모달 열기
     }
   };
 
-  const handleToggleCommentLike = (commentId: string) => {
-    setComments(prev =>
-      prev.map(comment =>
-        comment.id === commentId
-          ? {
-              ...comment,
-              liked: !comment.liked,
-              likes: comment.liked ? comment.likes - 1 : comment.likes + 1,
-            }
-          : comment,
-      ),
-    );
+  const renderPlaceLinks = (keyword: string) => {
+    const placeIds = location?.nearbyPlaceIds?.[keyword]?.split(',') || [];
+    return placeIds.map((placeId: string, idx: number) => (
+      <TouchableOpacity
+        key={idx}
+        onPress={() => {
+          setSelectedPlaceId(placeId);
+          setWebViewVisible(true);
+        }}>
+        <Text style={styles.keyword}>
+          • {keyword} (장소 {idx + 1})
+        </Text>
+      </TouchableOpacity>
+    ));
   };
 
   if (!location) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <ScrollView style={styles.container}>
-        <Image source={{uri: location.image}} style={styles.image} />
-        <View style={styles.content}>
-          <Text style={styles.name}>{location.name}</Text>
-          <Text style={styles.address}>{location.address}</Text>
-
-          <LikeButton
-            liked={likeState.liked}
-            likeCount={likeState.likes}
-            onToggle={handleToggleLocationLike}
-          />
-
-          <Text style={styles.sectionTitle}>댓글</Text>
-          {comments.length > 0 ? (
-            comments.map(comment => (
-              <CommentItem
-                key={comment.id}
-                comment={{
-                  ...comment,
-                  onToggleLike: () => handleToggleCommentLike(comment.id),
-                }}
-              />
-            ))
-          ) : (
-            <Text style={styles.noComment}>아직 댓글이 없습니다.</Text>
+    <>
+      <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+        <ScrollView style={styles.container}>
+          {location.images?.length > 0 && (
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              style={styles.imageCarousel}>
+              {location.images?.map((img: string, idx: number) => (
+                <Image
+                  key={idx}
+                  source={{uri: img}}
+                  style={styles.carouselImage}
+                  resizeMode="cover"
+                />
+              ))}
+            </ScrollView>
           )}
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>닫기</Text>
+          <View style={styles.content}>
+            <Text style={styles.title}>{location.name}</Text>
+            <Text style={styles.subtitle}>
+              {location.movieTitle} 영화 촬영지
+            </Text>
+            <Text style={styles.text}>📍 {location.address}</Text>
+            <Text style={styles.text}>{location.description}</Text>
+
+            <Text style={styles.sectionTitle}>⏱ 예상 방문 시간</Text>
+            <Text style={styles.text}>{location.durationTime} 시간</Text>
+
+            <Text style={styles.sectionTitle}>🏷 키워드</Text>
+            {location.recommendationKeywords?.map(
+              (kw: string, idx: number) =>
+                kw && (
+                  <Text key={idx} style={styles.keyword}>
+                    • {kw}
+                  </Text>
+                ),
+            )}
+
+            {validNearbyKeywords?.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>📍 주변 키워드</Text>
+                {validNearbyKeywords.map((kw: string, idx: number) => (
+                  <View key={idx}>{renderPlaceLinks(kw)}</View>
+                ))}
+              </>
+            )}
+
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>닫기</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Modal>
+
+      <Modal
+        visible={webViewVisible}
+        animationType="slide"
+        onRequestClose={() => setWebViewVisible(false)}>
+        <View style={{flex: 1}}>
+          <TouchableOpacity
+            style={{padding: 10, backgroundColor: '#007AFF'}}
+            onPress={() => setWebViewVisible(false)}>
+            <Text style={{color: 'white', textAlign: 'center'}}>닫기</Text>
           </TouchableOpacity>
+
+          <WebView
+            source={{
+              uri: `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${selectedPlaceId}`, // URL을 이처럼 설정
+            }}
+            style={{flex: 1}}
+          />
         </View>
-      </ScrollView>
-    </Modal>
+      </Modal>
+    </>
   );
 };
 
@@ -111,42 +160,65 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 250,
   },
+  subImage: {
+    width: '100%',
+    height: 200,
+    marginVertical: 8,
+  },
   content: {
     padding: 16,
   },
-  name: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 6,
   },
-  address: {
+  subtitle: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 10,
+    fontWeight: '600',
+    color: '#555',
+    marginBottom: 12,
+  },
+  text: {
+    fontSize: 14,
+    marginBottom: 6,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
     marginTop: 20,
-    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingBottom: 4,
+    marginBottom: 8,
   },
-  noComment: {
+  keyword: {
     fontSize: 14,
-    color: '#aaa',
-    textAlign: 'center',
-    marginVertical: 10,
+    marginLeft: 10,
+    marginBottom: 4,
+    color: '#333',
   },
   closeButton: {
     backgroundColor: '#007AFF',
     paddingVertical: 12,
     borderRadius: 6,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 30,
+    marginBottom: 20,
   },
   closeButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  imageCarousel: {
+    height: 250,
+    marginBottom: 16,
+  },
+
+  carouselImage: {
+    width: Dimensions.get('window').width,
+    height: 250,
   },
 });
 
