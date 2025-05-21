@@ -23,6 +23,9 @@ import LoginScreen from './src/screens/LoginScreen';
 import MapScreen from './src/screens/MapScreen';
 import TravelHoursSelectionScreen from './src/screens/TravelHoursSelectionScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import MyPageScreen from './src/screens/MyPageScreen';
+import MyProfileScreen from './src/screens/MyProfileScreen';
+import MyTravelPlansScreen from './src/screens/MyTravelPlansScreen';
 
 // 1. 타입 정의
 export type RootStackParamList = {
@@ -52,6 +55,15 @@ export type RootStackParamList = {
   };
   MyTravels: undefined;
   MyReviews: undefined;
+  MyProfile: {
+    user: {
+      id: number;
+      name: string;
+      email: string;
+      picture: string;
+      role: string;
+    };
+  };
 };
 
 type MainTabsParamList = {
@@ -74,18 +86,6 @@ const Tab = createBottomTabNavigator<MainTabsParamList>();
 
 // Tab Screens
 type HomeScreenProps = BottomTabScreenProps<MainTabsParamList, 'Home'>;
-
-const MyPageScreen = () => (
-  <View>
-    <Text>My Page Screen</Text>
-  </View>
-);
-
-const MyTravelScreen = () => (
-  <View>
-    <Text>My Travel Screen</Text>
-  </View>
-);
 
 const MyReviewsScreen = () => (
   <View>
@@ -177,12 +177,17 @@ export default function App() {
         />
         <Stack.Screen
           name="MyTravels"
-          component={MyTravelScreen}
+          component={MyTravelPlansScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen
           name="MyReviews"
           component={MyReviewsScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="MyProfile"
+          component={MyProfileScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

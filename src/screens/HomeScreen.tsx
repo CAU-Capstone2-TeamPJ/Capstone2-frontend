@@ -10,8 +10,6 @@ import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {getFilmRanking} from '../api/api';
 import FilmCard from '../components/FilmCard';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../App';
 
 interface Film {
   id: number;

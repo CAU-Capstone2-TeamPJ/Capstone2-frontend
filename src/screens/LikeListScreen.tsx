@@ -1,102 +1,77 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   SafeAreaView,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import LikedItemCard from '../components/LikedItemCard';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
+import LikedItemCard from '../components/LikedItemCard';
+import {getLikeFilms, likeFilm} from '../api/api'; // API 함수 경로 맞게 수정
 
-interface LikedItem {
+interface Film {
   id: number;
-  type: 'movie' | 'location';
   title: string;
-  year?: number;
-  image: string;
-  likes: number;
-  liked: boolean;
+  originalTitle: string;
+  overview: string;
+  posterPath: string;
+  releaseDate: string;
+  likesCount: number;
+  isLiked: boolean;
+  // 필요한 경우 다른 필드도 추가
 }
 
-const dummyLikedItems: LikedItem[] = [
-  {
-    id: 1,
-    type: 'movie',
-    title: '인셉션',
-    year: 2010,
-    image: 'https://example.com/inception.jpg',
-    likes: 1200,
-    liked: true,
-  },
-  {
-    id: 2,
-    type: 'location',
-    title: '남산타워',
-    image: 'https://example.com/namsan.jpg',
-    likes: 400,
-    liked: true,
-  },
-];
-
 const LikeListScreen: React.FC = () => {
-  const [selectedType, setSelectedType] = useState<'movie' | 'location'>(
-    'movie',
-  );
-  const [sortOption, setSortOption] = useState<'alpha' | 'likes'>('alpha');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<LikedItem | null>(
-    null,
-  );
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [films, setFilms] = useState<Film[]>([]);
+  const [sortOption, setSortOption] = useState<'alpha' | 'likes'>('alpha');
+  const [loading, setLoading] = useState(true);
 
-  const filteredItems = dummyLikedItems
-    .filter(item => item.type === selectedType)
-    .sort((a, b) => {
-      if (sortOption === 'alpha') {
-        return a.title.localeCompare(b.title);
-      } else {
-        return b.likes - a.likes;
+  useEffect(() => {
+    const fetchLikedFilms = async () => {
+      try {
+        const data = await getLikeFilms();
+        setFilms(data);
+      } catch (err) {
+        console.error('좋아요 영화 불러오기 실패:', err);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
 
-  const handlePress = (item: LikedItem) => {
-    if (item.type === 'movie') {
-      navigation.navigate('FilmDetail', {filmId: item.id});
+    fetchLikedFilms();
+  }, []);
+
+  const sortedFilms = [...films].sort((a, b) => {
+    if (sortOption === 'alpha') {
+      return a.title.localeCompare(b.title);
     } else {
-      setSelectedLocation(item);
-      setModalVisible(true);
+      return b.likesCount - a.likesCount;
     }
+  });
+
+  const handlePress = (film: Film) => {
+    navigation.navigate('FilmDetail', {filmId: film.id});
   };
 
-  const handleToggleLike = () => {
-    // TODO: 좋아요 해제 시 처리 로직 (ex: 목록에서 제거)
+  const handleToggleLike = async (filmId: number) => {
+    try {
+      await likeFilm(filmId);
+      const updated = await getLikeFilms(); // 최신 목록으로 갱신
+      setFilms(updated);
+    } catch (error) {
+      console.error('좋아요 토글 실패:', error);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 탭 선택 */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, selectedType === 'movie' && styles.selectedTab]}
-          onPress={() => setSelectedType('movie')}>
-          <Text style={styles.tabText}>작품</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            selectedType === 'location' && styles.selectedTab,
-          ]}
-          onPress={() => setSelectedType('location')}>
-          <Text style={styles.tabText}>장소</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 정렬 옵션 */}
       <View style={styles.sortContainer}>
         <TouchableOpacity onPress={() => setSortOption('alpha')}>
           <Text
@@ -118,31 +93,34 @@ const LikeListScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* 결과 목록 */}
-      {filteredItems.length > 0 ? (
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color="#007AFF"
+          style={{marginTop: 40}}
+        />
+      ) : films.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>좋아요한 작품이 없습니다</Text>
+        </View>
+      ) : (
         <FlatList
-          data={filteredItems}
-          keyExtractor={item => `${item.type}-${item.id}`}
+          data={sortedFilms}
+          keyExtractor={item => item.id.toString()}
           renderItem={({item}) => (
             <LikedItemCard
-              type={item.type}
-              imageUri={item.image}
+              type="movie"
+              imageUri={item.posterPath}
               title={item.title}
-              subtitle={item.year ? item.year.toString() : undefined}
-              likes={item.likes}
-              liked={item.liked}
+              subtitle={item.releaseDate?.slice(0, 4)}
+              likes={item.likesCount}
+              liked={item.isLiked}
               onPress={() => handlePress(item)}
-              onToggleLike={handleToggleLike}
+              onToggleLike={() => handleToggleLike(item.id)} // 추후 기능 구현
             />
           )}
           contentContainerStyle={styles.list}
         />
-      ) : (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>
-            좋아요한 {selectedType === 'movie' ? '작품' : '장소'}가 없습니다.
-          </Text>
-        </View>
       )}
     </SafeAreaView>
   );
@@ -150,24 +128,6 @@ const LikeListScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#fff'},
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    borderBottomColor: '#eee',
-    borderBottomWidth: 1,
-  },
-  tab: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  selectedTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
-  },
-  tabText: {
-    fontSize: 16,
-    color: '#333',
-  },
   sortContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',

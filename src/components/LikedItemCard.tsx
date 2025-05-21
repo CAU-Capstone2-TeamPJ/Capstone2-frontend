@@ -15,7 +15,6 @@ interface Props {
 }
 
 const LikedItemCard: React.FC<Props> = ({
-  type,
   imageUri,
   title,
   subtitle,
@@ -26,7 +25,10 @@ const LikedItemCard: React.FC<Props> = ({
 }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image source={{uri: imageUri}} style={styles.image} />
+      <Image
+        source={{uri: `https://image.tmdb.org/t/p/w200${imageUri}`}}
+        style={styles.image}
+      />
       <View style={styles.info}>
         <Text style={styles.title}>{title}</Text>
         {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
