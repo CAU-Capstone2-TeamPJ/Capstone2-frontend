@@ -9,8 +9,9 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import {getLocationData} from '../api/api';
+import {getLocationData, getLocationReviews} from '../api/api';
 import {WebView} from 'react-native-webview';
+import CommentItem from '../components/CommentItem';
 
 interface LocationDetailModalProps {
   visible: boolean;
@@ -24,8 +25,10 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   onClose,
 }) => {
   const [location, setLocation] = useState<any>(null);
-  const [webViewVisible, setWebViewVisible] = useState(false); // 웹뷰 모달 visible 상태
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null); // 선택된 장소 ID
+  const [webViewVisible, setWebViewVisible] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
 
   const validNearbyKeywords = location?.nearbyKeywords?.filter(
     (kw: string) => kw?.trim() !== '',
@@ -37,19 +40,24 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
         try {
           const data = await getLocationData(id);
           setLocation(data);
+
+          setLoadingReviews(true);
+          const reviewsData = await getLocationReviews(id);
+          setReviews(reviewsData);
         } catch (error) {
           console.error('Error fetching location data:', error);
+        } finally {
+          setLoadingReviews(false);
         }
       })();
     }
   }, [id]);
 
   const handleKeywordPress = (keyword: string) => {
-    // 키워드에 맞는 placeId들을 가져옴
     const placeIds = location?.nearbyPlaceIds?.[keyword]?.split(',') || [];
     if (placeIds.length > 0) {
-      setSelectedPlaceId(placeIds[0]); // 첫 번째 장소 ID 선택
-      setWebViewVisible(true); // 웹뷰 모달 열기
+      setSelectedPlaceId(placeIds[0]);
+      setWebViewVisible(true);
     }
   };
 
@@ -68,6 +76,19 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
       </TouchableOpacity>
     ));
   };
+
+  const renderReviewSection = () => (
+    <View style={styles.commentSection}>
+      <Text style={styles.sectionTitle}>💬 댓글 ({reviews.length})</Text>
+      {loadingReviews ? (
+        <Text style={styles.text}>불러오는 중...</Text>
+      ) : reviews.length === 0 ? (
+        <Text style={styles.noCommentText}>아직 댓글이 없습니다.</Text>
+      ) : (
+        reviews.map(review => <CommentItem key={review.id} comment={review} />)
+      )}
+    </View>
+  );
 
   if (!location) return null;
 
@@ -122,6 +143,8 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
               </>
             )}
 
+            {renderReviewSection()}
+
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>닫기</Text>
             </TouchableOpacity>
@@ -142,7 +165,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
 
           <WebView
             source={{
-              uri: `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${selectedPlaceId}`, // URL을 이처럼 설정
+              uri: `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${selectedPlaceId}`,
             }}
             style={{flex: 1}}
           />
@@ -215,10 +238,18 @@ const styles = StyleSheet.create({
     height: 250,
     marginBottom: 16,
   },
-
   carouselImage: {
     width: Dimensions.get('window').width,
     height: 250,
+  },
+  commentSection: {
+    marginTop: 20,
+  },
+  noCommentText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    marginVertical: 10,
   },
 });
 

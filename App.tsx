@@ -15,15 +15,14 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FilmDetailScreen from './src/screens/FilmDetailScreen';
 import CountrySelectionScreen from './src/screens/CountrySelectionScreen';
-import DistanceSelectionScreen from './src/screens/TravelHoursSelectionScreen';
 import ConceptSelectionScreen from './src/screens/ConceptSelectionScreen';
-import PeriodSelectionScreen from './src/screens/PeriodSelectionScreen';
 import ScheduleScreen from './src/screens/ScheduleScreen';
 import SearchScreen from './src/screens/SearchScreen';
 import LikeListScreen from './src/screens/LikeListScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import MapScreen from './src/screens/MapScreen';
 import TravelHoursSelectionScreen from './src/screens/TravelHoursSelectionScreen';
+import HomeScreen from './src/screens/HomeScreen';
 
 // 1. 타입 정의
 export type RootStackParamList = {
@@ -51,6 +50,8 @@ export type RootStackParamList = {
       }[];
     }[];
   };
+  MyTravels: undefined;
+  MyReviews: undefined;
 };
 
 type MainTabsParamList = {
@@ -73,19 +74,22 @@ const Tab = createBottomTabNavigator<MainTabsParamList>();
 
 // Tab Screens
 type HomeScreenProps = BottomTabScreenProps<MainTabsParamList, 'Home'>;
-const HomeScreen = ({navigation}: HomeScreenProps) => (
-  <View>
-    <Text>Home Screen</Text>
-    <Button
-      title="검색창으로 이동"
-      onPress={() => navigation.navigate('Search')}
-    />
-  </View>
-);
 
 const MyPageScreen = () => (
   <View>
     <Text>My Page Screen</Text>
+  </View>
+);
+
+const MyTravelScreen = () => (
+  <View>
+    <Text>My Travel Screen</Text>
+  </View>
+);
+
+const MyReviewsScreen = () => (
+  <View>
+    <Text>My Reviews Screen</Text>
   </View>
 );
 
@@ -169,6 +173,16 @@ export default function App() {
         <Stack.Screen
           name="Map"
           component={MapScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="MyTravels"
+          component={MyTravelScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="MyReviews"
+          component={MyReviewsScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

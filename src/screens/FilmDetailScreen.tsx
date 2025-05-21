@@ -12,7 +12,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import ImageViewerModal from '../modals/ImageViewerModal';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {getFilmData} from '../api/api';
+import {getFilmData, likeFilm} from '../api/api';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FilmDetail'>;
 
@@ -56,9 +56,14 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
-  const toggleLike = () => {
-    setLiked(prev => !prev);
-    setLikeCount(prev => prev + (liked ? -1 : 1));
+  const toggleLike = async () => {
+    try {
+      const result = await likeFilm(filmId);
+      setLiked(result.isLiked);
+      setLikeCount(result.likesCount);
+    } catch (err) {
+      console.error('좋아요 처리 중 오류 발생:', err);
+    }
   };
 
   const openPosterModal = () => {

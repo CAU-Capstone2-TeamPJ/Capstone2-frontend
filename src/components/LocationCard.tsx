@@ -19,8 +19,6 @@ function extractPhotoReferenceFromUrl(url: string): string | null {
 
   const photoRef = url.substring(startIndex + photoRefKey.length, endIndex);
   const newUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${photoRef}&key=AIzaSyD3xTB3LouXLK652qAPKYll2rhuwZEaMHo`;
-
-  console.log('Extracted:', newUrl);
   return newUrl;
 }
 

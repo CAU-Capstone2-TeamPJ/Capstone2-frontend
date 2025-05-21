@@ -16,7 +16,8 @@ import {
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
-import {createTravelPlan} from '../api/api';
+import {createTravelPlan, deleteTravelPlan} from '../api/api';
+import TravelDeleteModal from '../modals/TravelDeleteModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Schedule'>;
 
@@ -45,6 +46,28 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
   const [schedule, setSchedule] = useState<any[]>([]);
   const [totalDays, setTotalDays] = useState<number>(0);
 
+  const [travelId, setTravelId] = useState<number | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const handleBackPress = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (travelId === null) return;
+
+    try {
+      await deleteTravelPlan(travelId);
+      setDeleteModalVisible(false);
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'MainTabs'}],
+      });
+    } catch (error) {
+      console.error('여행 삭제 실패:', error);
+      // 실패 시 토스트 등 알림 처리도 가능
+    }
+  };
+
   const openModal = (location: any) => {
     setSelectedLocation(location);
     setIsModalVisible(true);
@@ -68,6 +91,8 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
 
         setSchedule(data.dailyRoutes);
         setTotalDays(data.totalDays);
+        setTravelId(data.savedPlanId);
+        console.log('여행 일정:', data.savedPlanId);
         console.log('받아온 일정:', data);
       } catch (error) {
         console.error('일정 생성 실패:', error);
@@ -99,7 +124,7 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
     <View style={styles.container}>
       {/* 상단 바 */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={handleBackPress}>
           <Icon
             style={styles.headerIcon}
             name="arrow-back"
@@ -146,6 +171,12 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
           onClose={closeModal}
         />
       )}
+
+      <TravelDeleteModal
+        visible={deleteModalVisible}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+      />
     </View>
   );
 };

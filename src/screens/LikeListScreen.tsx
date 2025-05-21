@@ -8,7 +8,6 @@ import {
   SafeAreaView,
 } from 'react-native';
 import LikedItemCard from '../components/LikedItemCard';
-import LocationDetailModal from '../modals/LocationDetailModal';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
@@ -145,14 +144,6 @@ const LikeListScreen: React.FC = () => {
           </Text>
         </View>
       )}
-
-      {/* 장소 상세 모달 */}
-      <LocationDetailModal
-        visible={modalVisible}
-        location={selectedLocation}
-        onClose={() => setModalVisible(false)}
-        onToggleLike={handleToggleLike}
-      />
     </SafeAreaView>
   );
 };

@@ -1,69 +1,49 @@
 import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  FlatList,
-} from 'react-native';
-import LikeButton from './LikeButton';
+import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import ImageViewerModal from '../modals/ImageViewerModal';
 
 interface Comment {
-  id: string;
-  nickname: string;
+  id: number;
+  userName: string;
   content: string;
-  images: string[];
-  likes: number;
-  liked: boolean;
+  imageUrl: string; // ✅ 단일 이미지
   createdAt: string;
-  onToggleLike: () => void; // 좋아요 토글 기능을 받음
+  rating: number;
 }
+
+const formatDate = (isoDate: string) => {
+  const date = new Date(isoDate);
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD
+};
 
 const CommentItem: React.FC<{comment: Comment}> = ({comment}) => {
   const [viewerVisible, setViewerVisible] = useState(false);
-  const [viewerIndex, setViewerIndex] = useState(0);
 
-  const handleImagePress = (index: number) => {
-    setViewerIndex(index);
-    setViewerVisible(true);
+  const renderStars = (count: number) => {
+    return '⭐'.repeat(count);
   };
-
-  const renderThumbnail = ({item, index}: {item: string; index: number}) => (
-    <TouchableOpacity
-      onPress={() => handleImagePress(index)}
-      style={styles.thumbnailContainer}>
-      <Image source={{uri: item}} style={styles.thumbnail} />
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.commentContainer}>
-      <Text style={styles.nickname}>{comment.nickname}</Text>
-      <Text style={styles.content}>{comment.content}</Text>
-      {comment.images?.length > 0 && (
-        <FlatList
-          data={comment.images}
-          renderItem={renderThumbnail}
-          keyExtractor={(uri, idx) => `${comment.id}-img-${idx}`}
-          horizontal
-          style={styles.thumbnailList}
-        />
-      )}
-      <View style={styles.footer}>
-        <LikeButton
-          liked={comment.liked}
-          likeCount={comment.likes}
-          onToggle={comment.onToggleLike} // 부모에서 전달받은 onToggleLike 사용
-        />
-        <Text style={styles.time}>{comment.createdAt}</Text>
+      <View style={styles.header}>
+        <Text style={styles.nickname}>{comment.userName}</Text>
+        <Text style={styles.rating}>{renderStars(comment.rating)}</Text>
       </View>
+
+      <Text style={styles.content}>{comment.content}</Text>
+
+      {comment.imageUrl && (
+        <TouchableOpacity onPress={() => setViewerVisible(true)}>
+          <Image source={{uri: comment.imageUrl}} style={styles.image} />
+        </TouchableOpacity>
+      )}
+
+      <Text style={styles.time}>{formatDate(comment.createdAt)}</Text>
 
       <ImageViewerModal
         visible={viewerVisible}
-        imageUris={comment.images}
-        initialIndex={viewerIndex}
+        imageUris={[comment.imageUrl]}
+        initialIndex={0}
         onClose={() => setViewerVisible(false)}
       />
     </View>
@@ -73,38 +53,39 @@ const CommentItem: React.FC<{comment: Comment}> = ({comment}) => {
 const styles = StyleSheet.create({
   commentContainer: {
     marginBottom: 16,
-    backgroundColor: '#f8f8f8',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    padding: 14,
+    borderRadius: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
   },
   nickname: {
     fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 14,
+    color: '#333',
+  },
+  rating: {
+    fontSize: 14,
+    color: '#FFD700',
   },
   content: {
     fontSize: 14,
-    color: '#333',
-    marginBottom: 6,
+    color: '#444',
+    marginBottom: 8,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   time: {
     fontSize: 12,
     color: '#999',
-  },
-  thumbnailList: {
-    marginVertical: 8,
-  },
-  thumbnailContainer: {
-    marginRight: 8,
-  },
-  thumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 4,
+    textAlign: 'right',
   },
 });
 
