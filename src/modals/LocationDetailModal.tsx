@@ -12,6 +12,7 @@ import {
 import {getLocationData, getLocationReviews} from '../api/api';
 import {WebView} from 'react-native-webview';
 import CommentItem from '../components/CommentItem';
+import ReviewModal from './ReviewModal'; // 경로는 위치에 따라 조정
 
 interface LocationDetailModalProps {
   visible: boolean;
@@ -29,6 +30,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
 
   const validNearbyKeywords = location?.nearbyKeywords?.filter(
     (kw: string) => kw?.trim() !== '',
@@ -149,6 +151,11 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
               )}
 
             {renderReviewSection()}
+            <TouchableOpacity
+              style={styles.addCommentButton}
+              onPress={() => setReviewModalVisible(true)}>
+              <Text style={styles.addCommentButtonText}>댓글 달기</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>닫기</Text>
@@ -176,6 +183,16 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
           />
         </View>
       </Modal>
+
+      <ReviewModal
+        visible={reviewModalVisible}
+        locationId={id}
+        onClose={() => setReviewModalVisible(false)}
+        onSuccess={() => {
+          setReviewModalVisible(false);
+          getLocationReviews(id!).then(setReviews); // 댓글 새로고침
+        }}
+      />
     </>
   );
 };
@@ -255,6 +272,19 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     marginVertical: 10,
+  },
+  addCommentButton: {
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#28a745',
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  addCommentButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 

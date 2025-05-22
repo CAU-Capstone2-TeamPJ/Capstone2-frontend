@@ -270,3 +270,38 @@ export const getTravelPlan = async (id: number) => {
     throw error;
   }
 };
+
+export const postReview = async (
+  locationId: number,
+  content: string,
+  rating: number,
+  imageUrl: string | null,
+) => {
+  try {
+    const response = await fetch(
+      `${URL}/filming-locations/${locationId}/reviews`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: '*/*',
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({
+          content,
+          rating,
+          imageUrl,
+        }),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('서버 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
