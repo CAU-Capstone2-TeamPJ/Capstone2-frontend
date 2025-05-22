@@ -40,7 +40,7 @@ const SideSheet: React.FC<SideSheetProps> = ({
         <View style={styles.sheet}>
           {/* 헤더 */}
           <View style={styles.header}>
-            <Text style={styles.sheetTitle}>일정 선택</Text>
+            <Text style={styles.sheetTitle}>일자 선택</Text>
             <TouchableOpacity onPress={onClose}>
               <Icon name="close" size={24} color="#333" />
             </TouchableOpacity>

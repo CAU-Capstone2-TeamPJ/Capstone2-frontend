@@ -188,7 +188,7 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
             styles.saveButtonText,
             loading && styles.saveButtonTextDisabled,
           ]}>
-          일정 저장하기
+          여행 저장하기
         </Text>
       </TouchableOpacity>
 

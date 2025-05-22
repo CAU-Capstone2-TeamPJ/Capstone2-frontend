@@ -95,8 +95,15 @@ const MyTravelPlansScreen: React.FC<Props> = ({navigation}) => {
   const fetchPlans = async () => {
     try {
       const data = await getMyTravelPlans();
-      setTravelPlans(data);
-      setFilteredPlans(data);
+      // 최신순 정렬 적용
+      const sortedData = data.sort(
+        (
+          a: {createdAt: string | number | Date},
+          b: {createdAt: string | number | Date},
+        ) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      setTravelPlans(sortedData);
+      setFilteredPlans(sortedData);
     } catch (error) {
       console.error('여행 계획 불러오기 실패:', error);
     }

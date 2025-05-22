@@ -51,7 +51,7 @@ const FilmCard: React.FC<FilmCardProps> = ({film, rank}) => {
         <Text style={styles.meta}>
           🎬 {film.director} | ⭐ {film.voteAverage.toFixed(1)}
         </Text>
-        <Text style={styles.date}>📅 {film.releaseDate}</Text>
+        <Text style={styles.date}>📅 {film.releaseDate.slice(0, 4)}</Text>
       </View>
     </TouchableOpacity>
   );

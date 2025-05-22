@@ -73,7 +73,7 @@ const MapScreen: React.FC<Props> = ({navigation, route}) => {
   return (
     <SafeAreaView style={{flex: 1}}>
       <HeaderBar
-        title="일정"
+        title={selectedDate === 'all' ? '전체 일정' : selectedDate}
         onMenuPress={() => setSideVisible(true)}
         onBackPress={() => navigation.goBack()}
       />

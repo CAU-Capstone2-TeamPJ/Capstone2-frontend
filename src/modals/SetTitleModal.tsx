@@ -33,7 +33,7 @@ const SetTitleModal: React.FC<SetTitleModalProps> = ({
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.message}>일정 제목을 입력하세요</Text>
+          <Text style={styles.message}>여행 제목을 입력하세요</Text>
 
           <TextInput
             style={styles.input}
