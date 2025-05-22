@@ -39,13 +39,12 @@ const MapScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    // 최초 진입 시 위치 보정
-    if (selectedEvents.places.length > 0) {
+    if (mapRef.current && selectedEvents.places.length > 0) {
       const coords = selectedEvents.places.map(p => ({
         latitude: p.latitude,
         longitude: p.longitude,
       }));
-      mapRef.current?.fitToCoordinates(coords, {
+      mapRef.current.fitToCoordinates(coords, {
         edgePadding: {top: 50, right: 50, bottom: 50, left: 50},
         animated: false,
       });
@@ -60,48 +59,41 @@ const MapScreen: React.FC<Props> = ({navigation, route}) => {
         onBackPress={() => navigation.goBack()}
       />
       <View style={styles.container}>
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={
-            firstPlace
-              ? {
-                  latitude: firstPlace.latitude,
-                  longitude: firstPlace.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }
-              : {
-                  latitude: 37.5665,
-                  longitude: 126.978,
-                  latitudeDelta: 0.05,
-                  longitudeDelta: 0.05,
-                }
-          }
-          showsUserLocation
-          zoomEnabled
-          zoomControlEnabled>
-          {selectedEvents.places.map((coord, index) => (
-            <Marker
-              key={`${coord.latitude}-${coord.longitude}`}
-              coordinate={{
-                latitude: coord.latitude,
-                longitude: coord.longitude,
-              }}
-              title={coord.title}>
-              <View style={styles.customMarker}>
-                <Text style={styles.markerText}>{index + 1}</Text>
-              </View>
-            </Marker>
-          ))}
-          {selectedEvents.places.length > 0 && (
-            <Polyline
-              coordinates={selectedEvents.places}
-              strokeWidth={4}
-              strokeColor="blue"
-            />
-          )}
-        </MapView>
+        {firstPlace && (
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={{
+              latitude: firstPlace.latitude,
+              longitude: firstPlace.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+            showsUserLocation
+            zoomEnabled
+            zoomControlEnabled>
+            {selectedEvents.places.map((coord, index) => (
+              <Marker
+                key={`${coord.latitude}-${coord.longitude}`}
+                coordinate={{
+                  latitude: coord.latitude,
+                  longitude: coord.longitude,
+                }}
+                title={coord.title}>
+                <View style={styles.customMarker}>
+                  <Text style={styles.markerText}>{index + 1}</Text>
+                </View>
+              </Marker>
+            ))}
+            {selectedEvents.places.length > 0 && (
+              <Polyline
+                coordinates={selectedEvents.places}
+                strokeWidth={4}
+                strokeColor="blue"
+              />
+            )}
+          </MapView>
+        )}
       </View>
       <SideSheet
         visible={sideVisible}

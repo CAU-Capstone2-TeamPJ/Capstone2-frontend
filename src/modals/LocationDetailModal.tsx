@@ -134,14 +134,19 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
                 ),
             )}
 
-            {validNearbyKeywords?.length > 0 && (
-              <>
-                <Text style={styles.sectionTitle}>📍 주변 키워드</Text>
-                {validNearbyKeywords.map((kw: string, idx: number) => (
-                  <View key={idx}>{renderPlaceLinks(kw)}</View>
-                ))}
-              </>
-            )}
+            {validNearbyKeywords?.length > 0 &&
+              validNearbyKeywords.every(
+                (kw: string) =>
+                  location.nearbyPlaceIds?.[kw] &&
+                  !location.nearbyPlaceIds[kw].includes('dummy'),
+              ) && (
+                <>
+                  <Text style={styles.sectionTitle}>📍 주변 키워드</Text>
+                  {validNearbyKeywords.map((kw: string, idx: number) => (
+                    <View key={idx}>{renderPlaceLinks(kw)}</View>
+                  ))}
+                </>
+              )}
 
             {renderReviewSection()}
 
