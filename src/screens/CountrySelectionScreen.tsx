@@ -16,19 +16,21 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Country'>;
 const CountrySelectionScreen = ({navigation, route}: Props) => {
   const {movieId, countries} = route.params;
 
-  const [country, setSelectedCountry] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   useEffect(() => {
     if (countries.length === 1) {
       setSelectedCountry(countries[0]);
+    } else {
+      setSelectedCountry(null);
     }
   }, [countries]);
 
   const handleNext = () => {
-    if (country) {
+    if (selectedCountry) {
       navigation.navigate('TravelHours', {
         movieId,
-        country,
+        country: selectedCountry,
       });
     }
   };
@@ -66,20 +68,20 @@ const CountrySelectionScreen = ({navigation, route}: Props) => {
 
       {/* 국가 선택 버튼 */}
       <ScrollView contentContainerStyle={styles.buttonsContainer}>
-        {countries.map(country => (
+        {countries.map(item => (
           <TouchableOpacity
-            key={country}
+            key={item}
             style={[
               styles.selectButton,
-              country === country && styles.selectedButton,
+              item === selectedCountry && styles.selectedButton,
             ]}
-            onPress={() => setSelectedCountry(country)}>
+            onPress={() => setSelectedCountry(item)}>
             <Text
               style={[
                 styles.buttonText,
-                country === country && styles.selectedText,
+                item === selectedCountry && styles.selectedText,
               ]}>
-              {country}
+              {item}
             </Text>
           </TouchableOpacity>
         ))}
@@ -87,9 +89,12 @@ const CountrySelectionScreen = ({navigation, route}: Props) => {
 
       {/* 다음 버튼 */}
       <TouchableOpacity
-        style={[styles.nextButton, country === null && styles.disabledButton]}
+        style={[
+          styles.nextButton,
+          selectedCountry === null && styles.disabledButton,
+        ]}
         onPress={handleNext}
-        disabled={country === null}>
+        disabled={selectedCountry === null}>
         <Text style={styles.nextButtonText}>다음</Text>
       </TouchableOpacity>
     </SafeAreaView>

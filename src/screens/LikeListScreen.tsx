@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -12,7 +13,7 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import LikedItemCard from '../components/LikedItemCard';
-import {getLikeFilms, likeFilm} from '../api/api'; // API 함수 경로 맞게 수정
+import {getLikeFilms, likeFilm} from '../api/api';
 
 interface Film {
   id: number;
@@ -23,7 +24,6 @@ interface Film {
   releaseDate: string;
   likesCount: number;
   isLiked: boolean;
-  // 필요한 경우 다른 필드도 추가
 }
 
 const LikeListScreen: React.FC = () => {
@@ -33,27 +33,28 @@ const LikeListScreen: React.FC = () => {
   const [sortOption, setSortOption] = useState<'alpha' | 'likes'>('alpha');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchLikedFilms = async () => {
-      try {
-        const data = await getLikeFilms();
-        setFilms(data);
-      } catch (err) {
-        console.error('좋아요 영화 불러오기 실패:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchLikedFilms = async () => {
+    setLoading(true);
+    try {
+      const data = await getLikeFilms();
+      setFilms(data);
+    } catch (err) {
+      console.error('좋아요 영화 불러오기 실패:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchLikedFilms();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedFilms();
+    }, []),
+  );
 
   const sortedFilms = [...films].sort((a, b) => {
-    if (sortOption === 'alpha') {
-      return a.title.localeCompare(b.title);
-    } else {
-      return b.likesCount - a.likesCount;
-    }
+    return sortOption === 'alpha'
+      ? a.title.localeCompare(b.title)
+      : b.likesCount - a.likesCount;
   });
 
   const handlePress = (film: Film) => {
@@ -63,7 +64,7 @@ const LikeListScreen: React.FC = () => {
   const handleToggleLike = async (filmId: number) => {
     try {
       await likeFilm(filmId);
-      const updated = await getLikeFilms(); // 최신 목록으로 갱신
+      const updated = await getLikeFilms();
       setFilms(updated);
     } catch (error) {
       console.error('좋아요 토글 실패:', error);
@@ -72,6 +73,12 @@ const LikeListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* 상단 헤더 */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>내가 좋아요한 작품들</Text>
+      </View>
+
+      {/* 정렬 옵션 */}
       <View style={styles.sortContainer}>
         <TouchableOpacity onPress={() => setSortOption('alpha')}>
           <Text
@@ -93,6 +100,7 @@ const LikeListScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      {/* 본문 */}
       {loading ? (
         <ActivityIndicator
           size="large"
@@ -116,7 +124,7 @@ const LikeListScreen: React.FC = () => {
               likes={item.likesCount}
               liked={item.isLiked}
               onPress={() => handlePress(item)}
-              onToggleLike={() => handleToggleLike(item.id)} // 추후 기능 구현
+              onToggleLike={() => handleToggleLike(item.id)}
             />
           )}
           contentContainerStyle={styles.list}
@@ -128,6 +136,14 @@ const LikeListScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#fff'},
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
   sortContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',

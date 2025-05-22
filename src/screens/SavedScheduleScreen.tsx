@@ -47,6 +47,7 @@ const SavedScheduleScreen: React.FC<Props> = ({navigation, route}) => {
   const [selectedLocation, setSelectedLocation] = useState<Location>();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [travelPlanName, setTravelPlanName] = useState<string>(''); // 여행 계획 이름 상태 추가
 
   useEffect(() => {
     const fetchSavedSchedule = async () => {
@@ -54,6 +55,7 @@ const SavedScheduleScreen: React.FC<Props> = ({navigation, route}) => {
         const data = await getTravelPlan(planId);
         setSchedule(data.tripDays);
         setTotalDays(data.totalDays);
+        setTravelPlanName(data.name); // 받은 data.name을 상태에 설정
       } catch (error) {
         console.error('저장된 일정 불러오기 실패:', error);
       }
@@ -105,10 +107,13 @@ const SavedScheduleScreen: React.FC<Props> = ({navigation, route}) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>저장된 여행 일정</Text>
+        <Text style={styles.headerTitle}>
+          {travelPlanName || '저장된 여행 일정'}
+        </Text>{' '}
+        {/* 여기서 제목을 업데이트 */}
         <TouchableOpacity onPress={() => goToMapScreen()}>
           <Icon name="map" size={24} color="#007AFF" />
-        </TouchableOpacity>{' '}
+        </TouchableOpacity>
       </View>
 
       {/* 날짜 탭 */}

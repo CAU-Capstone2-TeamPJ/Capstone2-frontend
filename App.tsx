@@ -27,6 +27,7 @@ import MyPageScreen from './src/screens/MyPageScreen';
 import MyProfileScreen from './src/screens/MyProfileScreen';
 import MyTravelPlansScreen from './src/screens/MyTravelPlansScreen';
 import SavedScheduleScreen from './src/screens/SavedScheduleScreen';
+import MyReviewScreen from './src/screens/MyReviewScreen';
 
 // 1. 타입 정의
 export type RootStackParamList = {
@@ -89,12 +90,6 @@ const Tab = createBottomTabNavigator<MainTabsParamList>();
 
 // Tab Screens
 type HomeScreenProps = BottomTabScreenProps<MainTabsParamList, 'Home'>;
-
-const MyReviewsScreen = () => (
-  <View>
-    <Text>My Reviews Screen</Text>
-  </View>
-);
 
 // 4. 바텀 탭 네비게이터
 function MainTabs() {
@@ -185,7 +180,7 @@ export default function App() {
         />
         <Stack.Screen
           name="MyReviews"
-          component={MyReviewsScreen}
+          component={MyReviewScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen

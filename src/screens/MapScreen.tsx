@@ -1,13 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {
-  StyleSheet,
-  View,
-  Dimensions,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
+import {StyleSheet, View, Dimensions, Text, SafeAreaView} from 'react-native';
 import MapView, {Marker, Polyline} from 'react-native-maps';
 import HeaderBar from '../components/HeaderBar';
 import SideSheet from '../components/SideSheet';
@@ -28,28 +20,55 @@ interface EventDay {
 }
 
 const MapScreen: React.FC<Props> = ({navigation, route}) => {
-  const {events} = route.params; // 👈 props로 events 받아오기
-  const [selectedDate, setSelectedDate] = useState(events[0]?.date || '');
+  const {events} = route.params;
+
+  // 'all'은 전체 일정을 의미
+  const [selectedDate, setSelectedDate] = useState<string | 'all'>(
+    events[0]?.date || '',
+  );
+
   const [sideVisible, setSideVisible] = useState(false);
   const mapRef = useRef<MapView>(null);
-  const firstPlace = events[0]?.places[0];
 
-  const selectedEvents = events.find(event => event.date === selectedDate) || {
-    places: [],
-  };
+  // 전체 일정의 모든 장소를 합침
+  const allPlaces: EventPlace[] = events.flatMap(event => event.places);
+
+  // 선택된 일정에 따라 표시할 장소 결정
+  const selectedPlaces =
+    selectedDate === 'all'
+      ? allPlaces
+      : events.find(event => event.date === selectedDate)?.places || [];
+
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    if (mapRef.current && selectedEvents.places.length > 0) {
-      const coords = selectedEvents.places.map(p => ({
+    if (mapReady && mapRef.current && selectedPlaces.length > 0) {
+      const coords = selectedPlaces.map(p => ({
         latitude: p.latitude,
         longitude: p.longitude,
       }));
       mapRef.current.fitToCoordinates(coords, {
         edgePadding: {top: 50, right: 50, bottom: 50, left: 50},
-        animated: false,
+        animated: true,
       });
     }
-  }, [selectedDate]);
+  }, [mapReady, selectedPlaces]);
+
+  // 장소를 클릭했을 때 해당 장소로 이동
+  const handleSelectPlace = (place: EventPlace) => {
+    mapRef.current?.animateToRegion(
+      {
+        latitude: place.latitude,
+        longitude: place.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      },
+      500,
+    );
+  };
+
+  // 초기 지점 설정 (전체 일정 선택 시 첫 장소 기준)
+  const initialPlace = selectedPlaces[0] || events[0]?.places[0];
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -59,20 +78,21 @@ const MapScreen: React.FC<Props> = ({navigation, route}) => {
         onBackPress={() => navigation.goBack()}
       />
       <View style={styles.container}>
-        {firstPlace && (
+        {initialPlace && (
           <MapView
             ref={mapRef}
             style={styles.map}
-            initialRegion={{
-              latitude: firstPlace.latitude,
-              longitude: firstPlace.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
+            onMapReady={() => setMapReady(true)}
             showsUserLocation
             zoomEnabled
-            zoomControlEnabled>
-            {selectedEvents.places.map((coord, index) => (
+            zoomControlEnabled
+            initialRegion={{
+              latitude: initialPlace.latitude,
+              longitude: initialPlace.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}>
+            {selectedPlaces.map((coord, index) => (
               <Marker
                 key={`${coord.latitude}-${coord.longitude}`}
                 coordinate={{
@@ -85,9 +105,9 @@ const MapScreen: React.FC<Props> = ({navigation, route}) => {
                 </View>
               </Marker>
             ))}
-            {selectedEvents.places.length > 0 && (
+            {selectedPlaces.length > 0 && (
               <Polyline
-                coordinates={selectedEvents.places}
+                coordinates={selectedPlaces}
                 strokeWidth={4}
                 strokeColor="blue"
               />
@@ -95,11 +115,13 @@ const MapScreen: React.FC<Props> = ({navigation, route}) => {
           </MapView>
         )}
       </View>
+
       <SideSheet
         visible={sideVisible}
         onClose={() => setSideVisible(false)}
         events={events}
         onSelectDate={setSelectedDate}
+        onSelectPlace={handleSelectPlace}
       />
     </SafeAreaView>
   );
@@ -124,15 +146,6 @@ const styles = StyleSheet.create({
   markerText: {
     fontWeight: 'bold',
     color: 'blue',
-  },
-  dateButton: {
-    padding: 10,
-    margin: 5,
-    backgroundColor: '#ddd',
-    borderRadius: 5,
-  },
-  dateText: {
-    fontSize: 16,
   },
 });
 

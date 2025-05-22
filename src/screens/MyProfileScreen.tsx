@@ -61,9 +61,10 @@ const styles = StyleSheet.create({
     borderColor: '#eee',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    paddingTop: 5,
   },
   editText: {
     color: '#007AFF',

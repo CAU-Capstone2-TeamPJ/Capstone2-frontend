@@ -17,7 +17,7 @@ const TravelHoursSelectionScreen: React.FC<Props> = ({navigation, route}) => {
   const {movieId, country} = route.params;
   const [selectedHours, setSelectedHours] = useState<number | null>(null);
 
-  const travelHoursOptions = Array.from({length: 9}, (_, i) => i + 2); // 2~10
+  const travelHoursOptions = Array.from({length: 6}, (_, i) => i + 1); // 2~10
 
   const handleNext = () => {
     if (selectedHours !== null) {
@@ -41,7 +41,7 @@ const TravelHoursSelectionScreen: React.FC<Props> = ({navigation, route}) => {
             color="#007AFF"
           />
         </TouchableOpacity>
-        <Text style={styles.headerText}>2단계: 여행 시간 선택</Text>
+        <Text style={styles.headerText}>2단계: 하루 이동 시간 선택</Text>
       </View>
 
       {/* 진행 바 */}
@@ -58,7 +58,9 @@ const TravelHoursSelectionScreen: React.FC<Props> = ({navigation, route}) => {
       </View>
 
       {/* 안내 문구 */}
-      <Text style={styles.prompt}>여행 시간을 선택해주세요 (단위: 시간)</Text>
+      <Text style={styles.prompt}>
+        하루에 이동할 시간을 선택해주세요 (단위: 시간)
+      </Text>
 
       {/* 시간 선택 버튼 */}
       <ScrollView contentContainerStyle={styles.buttonsContainer}>

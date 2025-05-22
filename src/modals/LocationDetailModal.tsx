@@ -186,12 +186,13 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
 
       <ReviewModal
         visible={reviewModalVisible}
-        locationId={id}
+        locationId={id ? id : undefined}
         onClose={() => setReviewModalVisible(false)}
         onSuccess={() => {
           setReviewModalVisible(false);
           getLocationReviews(id!).then(setReviews); // 댓글 새로고침
         }}
+        mode="create"
       />
     </>
   );

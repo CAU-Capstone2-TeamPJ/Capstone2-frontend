@@ -1,6 +1,6 @@
 const URL = 'https://86f0-221-150-84-108.ngrok-free.app/api';
 const TOKEN =
-  'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInN1YiI6ImNuNnRlZUBnbWFpbC5jb20iLCJpYXQiOjE3NDcyNTIxNDksImV4cCI6MTc0ODExNjE0OX0.2na-4-zK3j8_fyGJwwzasVK1bpMEfTSSC23V2QnaVw4';
+  'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInN1YiI6InFwcXAwMTA5QGdtYWlsLmNvbSIsImlhdCI6MTc0NzczMzAyMCwiZXhwIjoxNzU2MzczMDIwfQ.92m7jX6mvuGTrf_1oZioITxr-NRw6AYueOHAEbT-FXE';
 
 export const getUserProfile = async () => {
   try {
@@ -271,6 +271,31 @@ export const getTravelPlan = async (id: number) => {
   }
 };
 
+export const patchTravelPlanTitle = async (planId: number, name: string) => {
+  try {
+    const response = await fetch(`${URL}/saved-trip-plans/${planId}/name`, {
+      method: 'PATCH',
+      headers: {
+        Accept: '*/*',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({
+        name: name,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('서버 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
 export const postReview = async (
   locationId: number,
   content: string,
@@ -282,6 +307,82 @@ export const postReview = async (
       `${URL}/filming-locations/${locationId}/reviews`,
       {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: '*/*',
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({
+          content,
+          rating,
+          imageUrl,
+        }),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('서버 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+export const getMyReviews = async () => {
+  try {
+    const response = await fetch(`${URL}/filming-locations/my-reviews`, {
+      method: 'GET',
+      headers: {
+        Accept: '*/*',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+export const deleteReview = async (reviewId: number) => {
+  try {
+    const response = await fetch(
+      `${URL}/filming-locations/reviews/${reviewId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Accept: '*/*',
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+export const putReview = async (
+  reviewId: number,
+  content: string,
+  rating: number,
+  imageUrl: string | null,
+) => {
+  try {
+    const response = await fetch(
+      `${URL}/filming-locations/reviews/${reviewId}`,
+      {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Accept: '*/*',

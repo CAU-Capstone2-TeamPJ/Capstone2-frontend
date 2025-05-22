@@ -9,27 +9,38 @@ import {
   Image,
   Pressable,
 } from 'react-native';
-import {getUserProfile, postReview} from '../api/api';
 import * as ImagePicker from 'react-native-image-picker';
-import {uploadImageToCloudinary} from '../api/utils'; // 추가
+import {getUserProfile, postReview, putReview} from '../api/api';
+import {uploadImageToCloudinary} from '../api/utils';
 
 interface Props {
   visible: boolean;
-  locationId: number | null;
   onClose: () => void;
   onSuccess: () => void;
+  mode?: 'create' | 'edit';
+  locationId?: number; // 작성 시 필요
+  reviewId?: number; // 수정 시 필요
+  initialContent?: string;
+  initialRating?: number;
+  initialImageUrl?: string | null;
 }
 
 const ReviewModal: React.FC<Props> = ({
   visible,
-  locationId,
   onClose,
   onSuccess,
+  mode = 'create',
+  locationId,
+  reviewId,
+  initialContent = '',
+  initialRating = 0,
+  initialImageUrl = null,
 }) => {
   const [username, setUsername] = useState('');
-  const [content, setContent] = useState('');
-  const [rating, setRating] = useState(0);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [content, setContent] = useState(initialContent);
+  const [rating, setRating] = useState(initialRating);
+  const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -37,11 +48,11 @@ const ReviewModal: React.FC<Props> = ({
         const profile = await getUserProfile();
         setUsername(profile.name || '사용자');
       })();
-    }
 
-    setContent('');
-    setRating(0);
-    setImageUrl(null);
+      setContent(initialContent);
+      setRating(initialRating);
+      setImageUrl(initialImageUrl);
+    }
   }, [visible]);
 
   const handleImagePick = () => {
@@ -50,12 +61,13 @@ const ReviewModal: React.FC<Props> = ({
         const localUri = response.assets[0].uri;
 
         try {
-          console.log('📷 로컬 이미지 선택됨:', localUri);
+          setIsUploading(true);
           const uploadedUrl = await uploadImageToCloudinary(localUri!);
           setImageUrl(uploadedUrl);
-          console.log('🌐 Cloudinary 업로드 URL:', uploadedUrl);
         } catch (err) {
           alert('이미지 업로드에 실패했습니다.');
+        } finally {
+          setIsUploading(false);
         }
       }
     });
@@ -68,13 +80,16 @@ const ReviewModal: React.FC<Props> = ({
     }
 
     try {
-      await postReview(locationId!, content, rating, imageUrl);
+      if (mode === 'create') {
+        await postReview(locationId!, content, rating, imageUrl);
+      } else if (mode === 'edit' && reviewId != null) {
+        await putReview(reviewId, content, rating, imageUrl);
+      }
+
       onSuccess();
-      setContent('');
-      setRating(0);
-      setImageUrl(null);
+      onClose();
     } catch (err) {
-      console.error('리뷰 등록 실패', err);
+      console.error('리뷰 처리 실패', err);
     }
   };
 
@@ -86,7 +101,11 @@ const ReviewModal: React.FC<Props> = ({
       onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.modalContainer} onPress={() => {}}>
-          <Text style={styles.title}>✍️ {username}님, 댓글을 작성해주세요</Text>
+          <Text style={styles.title}>
+            {mode === 'edit'
+              ? '✏️ 댓글 수정'
+              : `✍️ ${username}님, 댓글을 작성해주세요`}
+          </Text>
 
           <TextInput
             placeholder="내용을 입력하세요"
@@ -126,9 +145,15 @@ const ReviewModal: React.FC<Props> = ({
               <Text style={styles.buttonText}>취소</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit}>
-              <Text style={styles.buttonText}>댓글달기</Text>
+              style={[
+                styles.submitButton,
+                isUploading && styles.submitButtonDisabled,
+              ]}
+              onPress={handleSubmit}
+              disabled={isUploading}>
+              <Text style={styles.buttonText}>
+                {mode === 'edit' ? '수정하기' : '댓글달기'}
+              </Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -207,6 +232,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     flex: 1,
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#aaa',
   },
   buttonText: {
     color: 'white',

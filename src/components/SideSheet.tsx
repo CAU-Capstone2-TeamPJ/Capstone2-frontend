@@ -10,11 +10,18 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+interface Place {
+  latitude: number;
+  longitude: number;
+  title: string;
+}
+
 interface SideSheetProps {
   visible: boolean;
   onClose: () => void;
-  events: {date: string; places: {title: string}[]}[];
+  events: {date: string; places: Place[]}[];
   onSelectDate: (date: string) => void;
+  onSelectPlace: (place: Place) => void; // 새 prop
 }
 
 const SideSheet: React.FC<SideSheetProps> = ({
@@ -22,6 +29,7 @@ const SideSheet: React.FC<SideSheetProps> = ({
   onClose,
   events,
   onSelectDate,
+  onSelectPlace,
 }) => {
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
 
@@ -38,6 +46,16 @@ const SideSheet: React.FC<SideSheetProps> = ({
             </TouchableOpacity>
           </View>
 
+          {/* 전체 일정 항목 추가 */}
+          <TouchableOpacity
+            style={[styles.item, {backgroundColor: '#d0e8ff'}]}
+            onPress={() => {
+              onSelectDate('all'); // 'all'은 전체 일정 선택 의미
+              onClose();
+            }}>
+            <Text style={[styles.date, {fontWeight: 'bold'}]}>전체 일정</Text>
+          </TouchableOpacity>
+
           {/* 일정 리스트 */}
           <FlatList
             data={events}
@@ -47,20 +65,29 @@ const SideSheet: React.FC<SideSheetProps> = ({
 
               return (
                 <View style={styles.item}>
-                  <TouchableOpacity
-                    style={styles.dateRow}
-                    onPress={() => {
-                      setExpandedDate(prev =>
-                        prev === item.date ? null : item.date,
-                      );
-                    }}>
-                    <Text style={styles.date}>{item.date}</Text>
-                    <Icon
-                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                      size={20}
-                      color="#007AFF"
-                    />
-                  </TouchableOpacity>
+                  <View style={styles.dateRow}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        onSelectDate(item.date);
+                        onClose();
+                      }}
+                      style={styles.dateTouchable}>
+                      <Text style={styles.date}>{item.date}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() =>
+                        setExpandedDate(prev =>
+                          prev === item.date ? null : item.date,
+                        )
+                      }>
+                      <Icon
+                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                        size={20}
+                        color="#007AFF"
+                      />
+                    </TouchableOpacity>
+                  </View>
 
                   {isExpanded && (
                     <View style={styles.placeList}>
@@ -70,6 +97,7 @@ const SideSheet: React.FC<SideSheetProps> = ({
                           style={styles.placeItem}
                           onPress={() => {
                             onSelectDate(item.date);
+                            onSelectPlace(place);
                             onClose();
                           }}>
                           <Text style={styles.placeText}>• {place.title}</Text>
@@ -128,15 +156,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 12,
   },
+  dateTouchable: {
+    flex: 1,
+  },
   date: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 4,
     color: '#333',
-  },
-  places: {
-    fontSize: 13,
-    color: '#555',
   },
   dateRow: {
     flexDirection: 'row',
@@ -144,16 +170,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
-
   placeList: {
     marginTop: 8,
     paddingLeft: 8,
   },
-
   placeItem: {
     paddingVertical: 6,
   },
-
   placeText: {
     fontSize: 14,
     color: '#444',
