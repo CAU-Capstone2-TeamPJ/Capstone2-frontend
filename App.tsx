@@ -26,6 +26,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import MyPageScreen from './src/screens/MyPageScreen';
 import MyProfileScreen from './src/screens/MyProfileScreen';
 import MyTravelPlansScreen from './src/screens/MyTravelPlansScreen';
+import SavedScheduleScreen from './src/screens/SavedScheduleScreen';
 
 // 1. 타입 정의
 export type RootStackParamList = {
@@ -36,6 +37,7 @@ export type RootStackParamList = {
   TravelHours: {movieId: number; country: string};
   Concept: {movieId: number; country: string; travelHours: number};
   Schedule: {
+    // 여행 일정 생성
     movieId: number;
     country: string;
     travelHours: number;
@@ -43,6 +45,7 @@ export type RootStackParamList = {
     originLat: number;
     originLng: number;
   };
+  SavedSchedule: {planId: number}; // 저장된 일정
   Map: {
     events: {
       date: string;
@@ -188,6 +191,11 @@ export default function App() {
         <Stack.Screen
           name="MyProfile"
           component={MyProfileScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="SavedSchedule"
+          component={SavedScheduleScreen}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

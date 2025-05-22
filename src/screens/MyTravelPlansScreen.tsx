@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   Button,
 } from 'react-native';
-import {Picker} from '@react-native-picker/picker'; // Picker 임포트 수정
+import {Picker} from '@react-native-picker/picker';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
-import {getMyTravelPlans} from '../api/api'; // getMyTravelPlans 함수 호출 (API 파일에 정의되어 있다고 가정)
+import {getMyTravelPlans} from '../api/api';
 
 interface Location {
   id: number;
@@ -58,7 +58,7 @@ interface TravelPlan {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MyTravels'>;
 
-const MyTravelPlansScreen: React.FC<Props> = () => {
+const MyTravelPlansScreen: React.FC<Props> = ({navigation}) => {
   const [travelPlans, setTravelPlans] = useState<TravelPlan[]>([]);
   const [filteredPlans, setFilteredPlans] = useState<TravelPlan[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
@@ -68,41 +68,41 @@ const MyTravelPlansScreen: React.FC<Props> = () => {
   );
 
   useEffect(() => {
-    // 여행 계획 데이터를 API에서 받아옵니다.
+    // 초기 데이터 불러오기
     getMyTravelPlans().then(data => {
       setTravelPlans(data);
       setFilteredPlans(data);
     });
   }, []);
 
-  // 필터링 및 정렬 함수
+  // 필터링 및 정렬을 상태 변화에 따라 자동 수행
+  useEffect(() => {
+    filterAndSortPlans();
+  }, [selectedMovie, selectedCountry, sortOption]);
+
   const filterAndSortPlans = () => {
     let filtered = [...travelPlans];
 
-    // 영화별 필터링
     if (selectedMovie) {
       filtered = filtered.filter(plan => plan.movieTitle === selectedMovie);
     }
 
-    // 국가별 필터링
     if (selectedCountry) {
       filtered = filtered.filter(plan => plan.country === selectedCountry);
     }
 
-    // 정렬
     if (sortOption === 'latest') {
-      filtered = filtered.sort(
+      filtered.sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
-    } else if (sortOption === 'alphabetical') {
-      filtered = filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
     }
 
     setFilteredPlans(filtered);
   };
 
-  // 영화 및 국가 목록 생성 (중복 제거)
   const getUniqueMovies = () => {
     return [...new Set(travelPlans.map(plan => plan.movieTitle))];
   };
@@ -115,48 +115,62 @@ const MyTravelPlansScreen: React.FC<Props> = () => {
     <View style={styles.container}>
       <Text style={styles.title}>내 여행 계획</Text>
 
-      {/* 필터 */}
       <View style={styles.filterContainer}>
+        {/* 영화 Picker */}
         <Picker
           selectedValue={selectedMovie}
-          onValueChange={itemValue => {
-            setSelectedMovie(itemValue);
-            filterAndSortPlans();
-          }}>
-          <Picker.Item label="영화 선택" value={null} />
+          onValueChange={value =>
+            setSelectedMovie(value === 'all' ? null : value)
+          }>
+          <Picker.Item label="전체 영화" value="all" />
           {getUniqueMovies().map(movie => (
             <Picker.Item key={movie} label={movie} value={movie} />
           ))}
         </Picker>
 
+        {/* 국가 Picker */}
         <Picker
           selectedValue={selectedCountry}
-          onValueChange={itemValue => {
-            setSelectedCountry(itemValue);
-            filterAndSortPlans();
-          }}>
-          <Picker.Item label="국가 선택" value={null} />
+          onValueChange={value =>
+            setSelectedCountry(value === 'all' ? null : value)
+          }>
+          <Picker.Item label="전체 국가" value="all" />
           {getUniqueCountries().map(country => (
             <Picker.Item key={country} label={country} value={country} />
           ))}
         </Picker>
 
-        {/* 정렬 */}
+        {/* 정렬 버튼 */}
         <View style={styles.sortContainer}>
-          <Button
-            title="최신순"
-            onPress={() => {
-              setSortOption('latest');
-              filterAndSortPlans();
-            }}
-          />
-          <Button
-            title="가나다순"
-            onPress={() => {
-              setSortOption('alphabetical');
-              filterAndSortPlans();
-            }}
-          />
+          <TouchableOpacity
+            style={[
+              styles.sortButton,
+              sortOption === 'latest' && styles.sortButtonActive,
+            ]}
+            onPress={() => setSortOption('latest')}>
+            <Text
+              style={[
+                styles.sortButtonText,
+                sortOption === 'latest' && styles.sortButtonTextActive,
+              ]}>
+              최신순
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.sortButton,
+              sortOption === 'alphabetical' && styles.sortButtonActive,
+            ]}
+            onPress={() => setSortOption('alphabetical')}>
+            <Text
+              style={[
+                styles.sortButtonText,
+                sortOption === 'alphabetical' && styles.sortButtonTextActive,
+              ]}>
+              가나다순
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -164,12 +178,16 @@ const MyTravelPlansScreen: React.FC<Props> = () => {
       <FlatList
         data={filteredPlans}
         renderItem={({item}) => (
-          <View style={styles.planCard}>
+          <TouchableOpacity
+            style={styles.planCard}
+            onPress={() =>
+              navigation.navigate('SavedSchedule', {planId: item.id})
+            }>
             <Text style={styles.planTitle}>{item.name}</Text>
             <Text>영화: {item.movieTitle}</Text>
             <Text>국가: {item.country}</Text>
             <Text>여행 시간: {item.travelHours} 시간</Text>
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={item => item.id.toString()}
       />
@@ -205,6 +223,27 @@ const styles = StyleSheet.create({
   planTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  sortButton: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+
+  sortButtonActive: {
+    backgroundColor: '#007AFF', // 선택된 버튼 색 (예: 녹색)
+  },
+
+  sortButtonText: {
+    color: '#757575', // 기본 텍스트 색 (회색)
+    fontWeight: 'bold',
+  },
+
+  sortButtonTextActive: {
+    color: '#fff', // 선택된 텍스트 색
   },
 });
 

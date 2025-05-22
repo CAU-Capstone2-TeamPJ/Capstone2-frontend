@@ -1,27 +1,23 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
 } from 'react-native';
-import LocationList from '../components/LocationList'; // 수정된 LocationList 컴포넌트
-import LocationDetailModal from '../modals/LocationDetailModal'; // 장소 상세 모달
-import {useNavigation} from '@react-navigation/native'; // 네비게이션 사용
-import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 임포트
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
-import {createTravelPlan, deleteTravelPlan} from '../api/api';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {getTravelPlan, deleteTravelPlan} from '../api/api';
+import LocationList from '../components/LocationList';
+import LocationDetailModal from '../modals/LocationDetailModal';
 import TravelDeleteModal from '../modals/TravelDeleteModal';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Schedule'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'SavedSchedule'>;
 
 interface Location {
+  id: number;
   locationId: number;
   locationName: string;
   address: string;
@@ -30,45 +26,47 @@ interface Location {
   visitOrder: number;
   travelTimeToNext: number;
   travelDistanceToNext: number;
-  recommendationKeywords: string[];
   concept: string;
   images: string[];
+  recommendationKeywords: string[];
 }
 
-const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
-  const {movieId, country, travelHours, concepts, originLat, originLng} =
-    route.params;
+interface TripDays {
+  id: number;
+  day: number;
+  travelTimeMinutes: number;
+  locations: Location[];
+}
 
-  const [selectedDay, setSelectedDay] = useState(0);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<Location>();
+const SavedScheduleScreen: React.FC<Props> = ({navigation, route}) => {
+  const {planId} = route.params;
 
   const [schedule, setSchedule] = useState<any[]>([]);
   const [totalDays, setTotalDays] = useState<number>(0);
-
-  const [travelId, setTravelId] = useState<number | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number>(0);
+  const [selectedLocation, setSelectedLocation] = useState<Location>();
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const handleBackPress = () => {
-    setDeleteModalVisible(true);
+
+  useEffect(() => {
+    const fetchSavedSchedule = async () => {
+      try {
+        const data = await getTravelPlan(planId);
+        setSchedule(data.tripDays);
+        setTotalDays(data.totalDays);
+      } catch (error) {
+        console.error('저장된 일정 불러오기 실패:', error);
+      }
+    };
+
+    fetchSavedSchedule();
+  }, [planId]);
+
+  const locationsByDay = (day: number) => {
+    return schedule[day]?.locations || [];
   };
 
-  const handleConfirmDelete = async () => {
-    if (travelId === null) return;
-
-    try {
-      await deleteTravelPlan(travelId);
-      setDeleteModalVisible(false);
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'MainTabs'}],
-      });
-    } catch (error) {
-      console.error('여행 삭제 실패:', error);
-      // 실패 시 토스트 등 알림 처리도 가능
-    }
-  };
-
-  const openModal = (location: any) => {
+  const openModal = (location: Location) => {
     setSelectedLocation(location);
     setIsModalVisible(true);
   };
@@ -77,34 +75,14 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
     setIsModalVisible(false);
   };
 
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        const data = await createTravelPlan(
-          movieId,
-          country,
-          travelHours,
-          concepts,
-          originLat,
-          originLng,
-        );
-
-        setSchedule(data.dailyRoutes);
-        setTotalDays(data.totalDays);
-        setTravelId(data.savedPlanId);
-        console.log('여행 일정:', data.savedPlanId);
-        console.log('받아온 일정:', data);
-      } catch (error) {
-        console.error('일정 생성 실패:', error);
-      }
-    };
-
-    fetchSchedule();
-  }, []);
-
-  // 해당 일차의 장소들 반환
-  const locationsByDay = (day: number) => {
-    return schedule[day]?.locations || [];
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteTravelPlan(planId);
+      setDeleteModalVisible(false);
+      navigation.goBack();
+    } catch (error) {
+      console.error('일정 삭제 실패:', error);
+    }
   };
 
   const goToMapScreen = () => {
@@ -122,23 +100,18 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
 
   return (
     <View style={styles.container}>
-      {/* 상단 바 */}
+      {/* 상단 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBackPress}>
-          <Icon
-            style={styles.headerIcon}
-            name="arrow-back"
-            size={24}
-            color="#007AFF"
-          />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>여행 일정</Text>
+        <Text style={styles.headerTitle}>저장된 여행 일정</Text>
         <TouchableOpacity onPress={() => goToMapScreen()}>
           <Icon name="map" size={24} color="#007AFF" />
-        </TouchableOpacity>
+        </TouchableOpacity>{' '}
       </View>
 
-      {/* 탭 */}
+      {/* 날짜 탭 */}
       <View style={styles.tabs}>
         {Array.from({length: totalDays}).map((_, index) => (
           <TouchableOpacity
@@ -150,7 +123,7 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
         ))}
       </View>
 
-      {/* 장소 목록 */}
+      {/* 장소 리스트 */}
       <ScrollView style={styles.content}>
         <LocationList
           locations={locationsByDay(selectedDay)}
@@ -158,16 +131,11 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
         />
       </ScrollView>
 
-      {/* 하단 저장 버튼 */}
+      {/* 하단 삭제 버튼 */}
       <TouchableOpacity
-        style={styles.saveButton}
-        onPress={() => {
-          navigation.reset({
-            index: 0,
-            routes: [{name: 'MainTabs'}],
-          });
-        }}>
-        <Text style={styles.saveButtonText}>일정 저장하기</Text>
+        style={[styles.saveButton, {backgroundColor: 'red'}]}
+        onPress={() => setDeleteModalVisible(true)}>
+        <Text style={styles.saveButtonText}>일정 삭제하기</Text>
       </TouchableOpacity>
 
       {/* 장소 상세 모달 */}
@@ -179,6 +147,7 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
         />
       )}
 
+      {/* 삭제 모달 */}
       <TravelDeleteModal
         visible={deleteModalVisible}
         onConfirm={handleConfirmDelete}
@@ -201,10 +170,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     justifyContent: 'space-between',
-  },
-  headerIcon: {
-    fontSize: 22,
-    color: '#007AFF',
   },
   headerTitle: {
     fontSize: 18,
@@ -245,4 +210,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScheduleScreen;
+export default SavedScheduleScreen;

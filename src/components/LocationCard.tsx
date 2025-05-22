@@ -6,7 +6,7 @@ interface LocationCardProps {
   onPress: (location: any) => void;
 }
 
-function extractPhotoReferenceFromUrl(url: string): string | null {
+function extractPhotoReferenceFromUrl(url: string): string | undefined {
   const photoRefKey = 'photo_reference=';
   const keyParam = '&key=';
 
@@ -14,7 +14,7 @@ function extractPhotoReferenceFromUrl(url: string): string | null {
   const endIndex = url.indexOf(keyParam);
 
   if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) {
-    return null; // 필수 파라미터가 없거나 순서가 잘못된 경우
+    return undefined; // 필수 파라미터가 없거나 순서가 잘못된 경우
   }
 
   const photoRef = url.substring(startIndex + photoRefKey.length, endIndex);
@@ -27,10 +27,15 @@ const LocationCard: React.FC<LocationCardProps> = ({location, onPress}) => {
     <TouchableOpacity style={styles.card} onPress={() => onPress(location)}>
       <Image
         source={{
-          uri: `${extractPhotoReferenceFromUrl(location.images[1])}`,
+          uri: extractPhotoReferenceFromUrl(
+            location.images.length >= 2
+              ? location.images[1]
+              : location.images[0], // 또는 기본 이미지 URL
+          ),
         }}
         style={styles.image}
       />
+
       <View style={styles.info}>
         <Text style={styles.name}>{location.locationName}</Text>
         <Text style={styles.address}>{location.address}</Text>

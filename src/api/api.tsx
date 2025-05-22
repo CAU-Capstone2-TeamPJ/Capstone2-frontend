@@ -249,3 +249,24 @@ export const deleteTravelPlan = async (id: number) => {
     throw error;
   }
 };
+
+export const getTravelPlan = async (id: number) => {
+  try {
+    const response = await fetch(`${URL}/saved-trip-plans/${id}`, {
+      method: 'GET',
+      headers: {
+        Accept: '*/*',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('서버 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
