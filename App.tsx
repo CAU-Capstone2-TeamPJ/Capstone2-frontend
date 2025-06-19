@@ -132,7 +132,7 @@ function MainTabs() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="MainTabs">
         <Stack.Screen
           name="Login"
           component={LoginScreen}
