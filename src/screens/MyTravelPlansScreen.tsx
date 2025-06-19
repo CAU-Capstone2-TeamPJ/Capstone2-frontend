@@ -364,6 +364,7 @@ const styles = StyleSheet.create({
   picker: {
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
+    color: '#000',
   },
   sortContainer: {
     flexDirection: 'row',
