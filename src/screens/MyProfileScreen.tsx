@@ -28,7 +28,7 @@ const MyProfileScreen: React.FC<Props> = ({route}) => {
       {/* 상단 헤더 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#007AFF" />
+          <Icon name="arrow-back" size={24} color="#009EFA" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>내 정보</Text>
         <TouchableOpacity onPress={handleEdit}>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   editText: {
-    color: '#007AFF',
+    color: '#009EFA',
     fontSize: 16,
   },
   content: {

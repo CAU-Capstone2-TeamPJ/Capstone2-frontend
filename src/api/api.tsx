@@ -1,4 +1,4 @@
-const URL = 'https://86f0-221-150-84-108.ngrok-free.app/api';
+const URL = 'https://3cf3-221-150-84-108.ngrok-free.app/api';
 const TOKEN =
   'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInN1YiI6InFwcXAwMTA5QGdtYWlsLmNvbSIsImlhdCI6MTc0NzczMzAyMCwiZXhwIjoxNzU2MzczMDIwfQ.92m7jX6mvuGTrf_1oZioITxr-NRw6AYueOHAEbT-FXE';
 
@@ -36,6 +36,8 @@ export const getMyTravelPlans = async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
+    console.log('서버 응답:', data);
+
     return data;
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -140,6 +142,27 @@ export const likeFilm = async (movieId: number) => {
         Authorization: `Bearer ${TOKEN}`,
       },
       body: JSON.stringify({}),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('서버 응답:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+export const getFilmByLocationId = async (id: number) => {
+  try {
+    const response = await fetch(`${URL}/filming-locations/${id}`, {
+      method: 'GET',
+      headers: {
+        Accept: '*/*',
+        Authorization: `Bearer ${TOKEN}`,
+      },
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

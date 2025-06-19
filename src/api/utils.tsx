@@ -31,3 +31,11 @@ export const uploadImageToCloudinary = async (imageUri: string) => {
     throw err;
   }
 };
+
+export async function fetchPlaceDetails(placeId: string, apiKey: string) {
+  const response = await fetch(
+    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,photos&key=${apiKey}`,
+  );
+  const data = await response.json();
+  return data.result;
+}

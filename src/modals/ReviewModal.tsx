@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
   imageButton: {
     marginTop: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#009EFA',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',

@@ -29,7 +29,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 const styles = StyleSheet.create({
   header: {
     height: 56,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#009EFA',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

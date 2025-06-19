@@ -56,6 +56,8 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
+  const [showFullSynopsis, setShowFullSynopsis] = useState(false);
+
   const toggleLike = async () => {
     try {
       const result = await likeFilm(filmId);
@@ -90,14 +92,11 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   const handleCreateTravelPlan = () => {
-    if (!film) return; // film이 null이면 아무 동작도 하지 않음
-
+    if (!film) return;
     navigation.navigate('Country', {
       movieId: filmId,
       countries: film.filmingCountries,
     });
-
-    console.log('여행 경로 만들기');
   };
 
   useEffect(() => {
@@ -129,55 +128,110 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#007AFF" />
+          <Icon name="arrow-back" size={24} color="#009EFA" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{film.title}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        <TouchableOpacity onPress={openPosterModal}>
+        <View style={styles.posterContainer}>
           <Image
             source={{uri: `https://image.tmdb.org/t/p/w500${film.posterPath}`}}
             style={styles.poster}
           />
-        </TouchableOpacity>
+          <View style={styles.titleCard}>
+            <View style={styles.titleRow}>
+              <Text style={styles.movieTitle}>{film.title}</Text>
+              <LikeButton
+                liked={liked}
+                likeCount={likeCount}
+                onToggle={toggleLike}
+              />
+            </View>
 
-        <Text style={styles.title}>
-          {film.title} ({new Date(film.releaseDate).getFullYear()})
-        </Text>
-        <Text style={styles.director}>감독 {film.director}</Text>
+            <Text style={styles.movieSubInfo}>
+              {new Date(film.releaseDate).getFullYear()} ・ {film.director} 감독
+            </Text>
+          </View>
+        </View>
 
-        <LikeButton liked={liked} likeCount={likeCount} onToggle={toggleLike} />
-
-        <Text style={styles.synopsis}>{film.overview}</Text>
-
-        <Text style={styles.castTitle}>출연진</Text>
-        {film.cast.slice(0, 4).map((actor, index) => (
-          <Text key={index} style={styles.cast}>
-            {actor.name}
-          </Text>
-        ))}
-
-        <Text style={styles.imagesTitle}>스틸컷</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {film.images.map((img, index) => (
-            <TouchableOpacity key={index} onPress={() => openImageModal(index)}>
-              <Image
-                source={{uri: `https://image.tmdb.org/t/p/w500${img.filePath}`}}
-                style={styles.imageThumbnail}
+        {/* 줄거리 섹션 */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>줄거리</Text>
+            <TouchableOpacity
+              onPress={() => setShowFullSynopsis(prev => !prev)}>
+              <Icon
+                name={showFullSynopsis ? 'chevron-up' : 'chevron-down'}
+                size={20}
+                color="#009EFA"
               />
             </TouchableOpacity>
+          </View>
+
+          <Text
+            style={styles.synopsis}
+            numberOfLines={showFullSynopsis ? undefined : 4}>
+            {film.overview}
+          </Text>
+        </View>
+
+        {/* 출연진 섹션 */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>출연진</Text>
+          {film.cast.slice(0, 4).map((actor, index) => (
+            <View key={index} style={styles.castRow}>
+              <Image
+                source={{
+                  uri:
+                    `https://image.tmdb.org/t/p/w500${actor.profilePath}` ||
+                    'https://via.placeholder.com/40',
+                }}
+                style={styles.castImage}
+              />
+              <Text style={styles.cast}>
+                {actor.name} - {actor.character}
+              </Text>
+            </View>
           ))}
-        </ScrollView>
+        </View>
+
+        {/* 스틸컷 섹션 */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>스틸컷</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {film.images.map((img, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => openImageModal(index)}>
+                <Image
+                  source={{
+                    uri: `https://image.tmdb.org/t/p/w500${img.filePath}`,
+                  }}
+                  style={styles.imageThumbnail}
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {film.filmingCountries.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>촬영 국가</Text>
+            <View style={styles.countryList}>
+              {film.filmingCountries.map((country, index) => (
+                <View key={index} style={styles.countryBadge}>
+                  <Text style={styles.countryText}>{country}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         <TouchableOpacity
-          style={[
-            styles.travelButton,
-            !film && {backgroundColor: '#ccc'}, // 비활성화 스타일
-          ]}
+          style={[styles.travelButton, !film && {backgroundColor: '#ccc'}]}
           onPress={handleCreateTravelPlan}
-          disabled={!film} // film이 없으면 비활성화
-        >
+          disabled={!film}>
           <Text style={styles.travelButtonText}>여행 경로 만들기</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -195,65 +249,112 @@ const FilmDetailScreen: React.FC<Props> = ({navigation, route}) => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
   },
   container: {
     padding: 20,
   },
+  posterContainer: {
+    marginBottom: 20,
+    borderRadius: 12,
+  },
   poster: {
     width: '100%',
-    height: 350,
-    borderRadius: 8,
+    height: 'auto',
+    aspectRatio: 2 / 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  titleCard: {
+    backgroundColor: '#fff',
+    padding: 16,
     marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
+    borderBottomEndRadius: 12,
+    borderBottomStartRadius: 12,
   },
-  title: {
-    fontSize: 20,
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  movieTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 10,
+    flexShrink: 1,
+    color: '#000',
   },
-  director: {
-    fontSize: 14,
-    marginBottom: 5,
+  movieSubInfo: {
+    fontSize: 15,
     color: '#666',
   },
-  castTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  sectionCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  synopsis: {
+    fontSize: 15,
+    color: '#444',
+    lineHeight: 22,
+  },
+  castRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
-    marginBottom: 5,
+  },
+  castImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+    backgroundColor: '#ccc',
   },
   cast: {
     fontSize: 14,
     color: '#333',
   },
-  imagesTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
-  },
   imageThumbnail: {
     width: 100,
     height: 100,
     marginRight: 10,
-    borderRadius: 8,
-  },
-  synopsis: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 10,
+    borderRadius: 10,
   },
   travelButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    backgroundColor: '#009EFA',
+    paddingVertical: 14,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
   },
   travelButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
   },
   headerBar: {
@@ -273,6 +374,30 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  moreButtonText: {
+    color: '#009EFA',
+    marginTop: 8,
+    fontWeight: '600',
+    alignSelf: 'flex-start',
+  },
+  countryList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  countryBadge: {
+    backgroundColor: '#E5F0FF',
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  countryText: {
+    fontSize: 14,
+    color: '#009EFA',
+    fontWeight: '500',
   },
 });
 

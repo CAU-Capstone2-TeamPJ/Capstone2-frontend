@@ -117,7 +117,7 @@ function MainTabs() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#007aff', // 원하는 색상
+        tabBarActiveTintColor: '#009EFA', // 원하는 색상
         tabBarInactiveTintColor: 'gray',
       })}>
       <Tab.Screen name="Home" component={HomeScreen} />

@@ -48,7 +48,7 @@ const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
             style={styles.backButton}
             name="arrow-back"
             size={24}
-            color="#007AFF"
+            color="#009EFA"
           />
         </TouchableOpacity>
         <Text style={styles.headerText}>3단계: 컨셉 선택</Text>
@@ -57,13 +57,13 @@ const ConceptSelectionScreen: React.FC<Props> = ({navigation, route}) => {
       {/* 진행 바 */}
       <View style={styles.progressBar}>
         <View
-          style={[styles.progressStep, {flex: 1, backgroundColor: '#007AFF'}]}
+          style={[styles.progressStep, {flex: 1, backgroundColor: '#009EFA'}]}
         />
         <View
-          style={[styles.progressStep, {flex: 1, backgroundColor: '#007AFF'}]}
+          style={[styles.progressStep, {flex: 1, backgroundColor: '#009EFA'}]}
         />
         <View
-          style={[styles.progressStep, {flex: 1, backgroundColor: '#007AFF'}]}
+          style={[styles.progressStep, {flex: 1, backgroundColor: '#009EFA'}]}
         />
       </View>
 
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 24,
-    color: '#007AFF',
+    color: '#009EFA',
     marginRight: 10,
   },
   headerText: {
@@ -163,19 +163,19 @@ const styles = StyleSheet.create({
   },
   selectedButton: {
     backgroundColor: '#e6f0ff',
-    borderColor: '#007AFF',
+    borderColor: '#009EFA',
   },
   buttonText: {
     fontSize: 16,
     color: '#333',
   },
   selectedText: {
-    color: '#007AFF',
+    color: '#009EFA',
     fontWeight: 'bold',
   },
   nextButton: {
     marginTop: 20,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#009EFA',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',

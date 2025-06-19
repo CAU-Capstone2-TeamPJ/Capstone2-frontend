@@ -10,7 +10,7 @@ interface Review {
   imageUrl: string;
   createdAt: string;
   rating: number;
-  locationName: string;
+  locationName?: string; // optional 처리
 }
 
 interface Props {
@@ -43,7 +43,11 @@ const ReviewCard: React.FC<Props> = ({review, onEdit, onDelete}) => {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.locationName}>📍 {review.locationName}</Text>
+        {review.locationName ? (
+          <Text style={styles.locationName}>📍 {review.locationName}</Text>
+        ) : (
+          <View />
+        )}
         {renderStars(review.rating)}
       </View>
 
@@ -58,10 +62,10 @@ const ReviewCard: React.FC<Props> = ({review, onEdit, onDelete}) => {
       <Text style={styles.date}>{formatDate(review.createdAt)}</Text>
 
       <View style={styles.actions}>
-        <TouchableOpacity onPress={() => onEdit()}>
-          <Text style={styles.editText}>수정</Text>s
+        <TouchableOpacity onPress={onEdit}>
+          <Text style={styles.editText}>수정</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => onDelete()}>
+        <TouchableOpacity onPress={onDelete}>
           <Text style={styles.deleteText}>삭제</Text>
         </TouchableOpacity>
       </View>
@@ -78,7 +82,7 @@ const ReviewCard: React.FC<Props> = ({review, onEdit, onDelete}) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -125,7 +129,7 @@ const styles = StyleSheet.create({
   },
   editText: {
     marginRight: 16,
-    color: '#007AFF',
+    color: '#009EFA',
     fontWeight: '600',
   },
   deleteText: {

@@ -12,13 +12,16 @@ import {
 import {getLocationData, getLocationReviews} from '../api/api';
 import {WebView} from 'react-native-webview';
 import CommentItem from '../components/CommentItem';
-import ReviewModal from './ReviewModal'; // 경로는 위치에 따라 조정
+import ReviewModal from './ReviewModal';
+import PlaceItem from '../components/PlaceItem';
 
 interface LocationDetailModalProps {
   visible: boolean;
   id: number | null;
   onClose: () => void;
 }
+
+const API_KEY = 'AIzaSyD3xTB3LouXLK652qAPKYll2rhuwZEaMHo';
 
 const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   visible,
@@ -31,10 +34,6 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   const [reviews, setReviews] = useState<any[]>([]);
   const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
-
-  const validNearbyKeywords = location?.nearbyKeywords?.filter(
-    (kw: string) => kw?.trim() !== '',
-  );
 
   useEffect(() => {
     if (id !== null) {
@@ -55,28 +54,51 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
     }
   }, [id]);
 
-  const handleKeywordPress = (keyword: string) => {
-    const placeIds = location?.nearbyPlaceIds?.[keyword]?.split(',') || [];
-    if (placeIds.length > 0) {
-      setSelectedPlaceId(placeIds[0]);
-      setWebViewVisible(true);
-    }
-  };
+  const validNearbyKeywords = location?.nearbyKeywords?.filter(
+    (kw: string) => kw?.trim() !== '',
+  );
 
-  const renderPlaceLinks = (keyword: string) => {
+  const renderPlaceItems = (keyword: string) => {
     const placeIds = location?.nearbyPlaceIds?.[keyword]?.split(',') || [];
-    return placeIds.map((placeId: string, idx: number) => (
-      <TouchableOpacity
-        key={idx}
-        onPress={() => {
-          setSelectedPlaceId(placeId);
-          setWebViewVisible(true);
-        }}>
-        <Text style={styles.keyword}>
-          • {keyword} (장소 {idx + 1})
+
+    const rows = [];
+    for (let i = 0; i < placeIds.length; i += 2) {
+      rows.push(placeIds.slice(i, i + 2));
+    }
+
+    return (
+      <View style={{marginTop: 12, marginHorizontal: 10}}>
+        <Text style={{fontWeight: 'bold', marginBottom: 4, fontSize: 15}}>
+          {keyword}
         </Text>
-      </TouchableOpacity>
-    ));
+        {rows.map((row, rowIndex) => (
+          <View
+            key={rowIndex}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              gap: 10,
+            }}>
+            {row.map((placeId: string, colIndex: number) => (
+              <View
+                key={placeId}
+                style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+                <PlaceItem
+                  placeId={placeId}
+                  index={colIndex}
+                  onSelect={pid => {
+                    setSelectedPlaceId(pid);
+                    setWebViewVisible(true);
+                  }}
+                  apiKey={API_KEY}
+                />
+              </View>
+            ))}
+            {row.length < 2 && <View style={{flex: 1}} />}
+          </View>
+        ))}
+      </View>
+    );
   };
 
   const renderReviewSection = () => (
@@ -104,7 +126,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               style={styles.imageCarousel}>
-              {location.images?.map((img: string, idx: number) => (
+              {location.images.map((img: string, idx: number) => (
                 <Image
                   key={idx}
                   source={{uri: img}}
@@ -145,7 +167,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
                 <>
                   <Text style={styles.sectionTitle}>📍 주변 키워드</Text>
                   {validNearbyKeywords.map((kw: string, idx: number) => (
-                    <View key={idx}>{renderPlaceLinks(kw)}</View>
+                    <View key={idx}>{renderPlaceItems(kw)}</View>
                   ))}
                 </>
               )}
@@ -170,11 +192,10 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
         onRequestClose={() => setWebViewVisible(false)}>
         <View style={{flex: 1}}>
           <TouchableOpacity
-            style={{padding: 10, backgroundColor: '#007AFF'}}
+            style={{padding: 10, backgroundColor: '#009EFA'}}
             onPress={() => setWebViewVisible(false)}>
             <Text style={{color: 'white', textAlign: 'center'}}>닫기</Text>
           </TouchableOpacity>
-
           <WebView
             source={{
               uri: `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${selectedPlaceId}`,
@@ -186,11 +207,11 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
 
       <ReviewModal
         visible={reviewModalVisible}
-        locationId={id ? id : undefined}
+        locationId={id ?? undefined}
         onClose={() => setReviewModalVisible(false)}
         onSuccess={() => {
           setReviewModalVisible(false);
-          getLocationReviews(id!).then(setReviews); // 댓글 새로고침
+          getLocationReviews(id!).then(setReviews);
         }}
         mode="create"
       />
@@ -202,14 +223,13 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
   },
-  image: {
-    width: '100%',
+  imageCarousel: {
     height: 250,
+    marginBottom: 16,
   },
-  subImage: {
-    width: '100%',
-    height: 200,
-    marginVertical: 8,
+  carouselImage: {
+    width: Dimensions.get('window').width,
+    height: 250,
   },
   content: {
     padding: 16,
@@ -244,27 +264,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     color: '#333',
   },
-  closeButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 20,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  imageCarousel: {
-    height: 250,
-    marginBottom: 16,
-  },
-  carouselImage: {
-    width: Dimensions.get('window').width,
-    height: 250,
-  },
   commentSection: {
     marginTop: 20,
   },
@@ -284,6 +283,19 @@ const styles = StyleSheet.create({
   },
   addCommentButtonText: {
     color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  closeButton: {
+    backgroundColor: '#009EFA',
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  closeButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },

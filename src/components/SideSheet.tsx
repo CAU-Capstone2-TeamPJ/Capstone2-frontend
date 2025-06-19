@@ -84,7 +84,7 @@ const SideSheet: React.FC<SideSheetProps> = ({
                       <Icon
                         name={isExpanded ? 'chevron-up' : 'chevron-down'}
                         size={20}
-                        color="#007AFF"
+                        color="#009EFA"
                       />
                     </TouchableOpacity>
                   </View>
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: '#009EFA',
   },
   item: {
     backgroundColor: '#F2F4F5',

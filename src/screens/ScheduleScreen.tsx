@@ -133,7 +133,7 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#009EFA" />
         <Text style={styles.loadingText}>일정을 생성 중입니다...</Text>
       </View>
     );
@@ -148,12 +148,12 @@ const ScheduleScreen: React.FC<Props> = ({navigation, route}) => {
             style={styles.headerIcon}
             name="arrow-back"
             size={24}
-            color={loading ? '#ccc' : '#007AFF'} // 로딩 중일 때 색상 변경
+            color={loading ? '#ccc' : '#009EFA'} // 로딩 중일 때 색상 변경
           />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>여행 일정</Text>
         <TouchableOpacity onPress={() => goToMapScreen()} disabled={loading}>
-          <Icon name="map" size={24} color={loading ? '#ccc' : '#007AFF'} />
+          <Icon name="map" size={24} color={loading ? '#ccc' : '#009EFA'} />
         </TouchableOpacity>
       </View>
 
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#007AFF',
+    color: '#009EFA',
     fontWeight: 'bold',
   },
   header: {
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     fontSize: 22,
-    color: '#007AFF',
+    color: '#009EFA',
   },
   headerTitle: {
     fontSize: 18,
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   selectedTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
+    borderBottomColor: '#009EFA',
   },
   tabText: {
     fontSize: 16,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     paddingVertical: 16,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#009EFA',
     alignItems: 'center',
   },
   saveButtonDisabled: {

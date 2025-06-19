@@ -24,13 +24,17 @@ interface Film {
   releaseDate: string;
   likesCount: number;
   isLiked: boolean;
+  voteAverage?: number; // 평균 평점 추가
+  director?: string; // 감독 정보 추가
 }
 
 const LikeListScreen: React.FC = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [films, setFilms] = useState<Film[]>([]);
-  const [sortOption, setSortOption] = useState<'alpha' | 'likes'>('alpha');
+  const [sortOption, setSortOption] = useState<'alpha' | 'likes' | 'rating'>(
+    'alpha',
+  );
   const [loading, setLoading] = useState(true);
 
   const fetchLikedFilms = async () => {
@@ -52,9 +56,16 @@ const LikeListScreen: React.FC = () => {
   );
 
   const sortedFilms = [...films].sort((a, b) => {
-    return sortOption === 'alpha'
-      ? a.title.localeCompare(b.title)
-      : b.likesCount - a.likesCount;
+    switch (sortOption) {
+      case 'alpha':
+        return a.title.localeCompare(b.title);
+      case 'likes':
+        return b.likesCount - a.likesCount;
+      case 'rating':
+        return (b.voteAverage || 0) - (a.voteAverage || 0);
+      default:
+        return 0;
+    }
   });
 
   const handlePress = (film: Film) => {
@@ -71,45 +82,60 @@ const LikeListScreen: React.FC = () => {
     }
   };
 
+  const getSortButtonStyle = (option: string) => [
+    styles.sortButton,
+    sortOption === option && styles.selectedSortButton,
+  ];
+
+  const getSortTextStyle = (option: string) => [
+    styles.sortText,
+    sortOption === option && styles.selectedSortText,
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       {/* 상단 헤더 */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>내가 좋아요한 작품들</Text>
+        <Text style={styles.headerTitle}>좋아요한 작품들</Text>
+        <Text style={styles.headerSubtitle}>
+          {films.length > 0 ? `총 ${films.length}개의 작품` : ''}
+        </Text>
       </View>
 
       {/* 정렬 옵션 */}
       <View style={styles.sortContainer}>
-        <TouchableOpacity onPress={() => setSortOption('alpha')}>
-          <Text
-            style={[
-              styles.sortText,
-              sortOption === 'alpha' && styles.selectedSort,
-            ]}>
-            가나다 순
-          </Text>
+        <TouchableOpacity
+          style={getSortButtonStyle('alpha')}
+          onPress={() => setSortOption('alpha')}>
+          <Text style={getSortTextStyle('alpha')}>가나다순</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSortOption('likes')}>
-          <Text
-            style={[
-              styles.sortText,
-              sortOption === 'likes' && styles.selectedSort,
-            ]}>
-            좋아요 순
-          </Text>
+
+        <TouchableOpacity
+          style={getSortButtonStyle('likes')}
+          onPress={() => setSortOption('likes')}>
+          <Text style={getSortTextStyle('likes')}>좋아요순</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={getSortButtonStyle('rating')}
+          onPress={() => setSortOption('rating')}>
+          <Text style={getSortTextStyle('rating')}>평점순</Text>
         </TouchableOpacity>
       </View>
 
       {/* 본문 */}
       {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="#007AFF"
-          style={{marginTop: 40}}
-        />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#009EFA" />
+          <Text style={styles.loadingText}>좋아요한 작품을 불러오는 중...</Text>
+        </View>
       ) : films.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>좋아요한 작품이 없습니다</Text>
+          <Text style={styles.emptyIcon}>💝</Text>
+          <Text style={styles.emptyTitle}>좋아요한 작품이 없습니다</Text>
+          <Text style={styles.emptyDescription}>
+            마음에 드는 작품에 좋아요를 눌러보세요!
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -123,11 +149,14 @@ const LikeListScreen: React.FC = () => {
               subtitle={item.releaseDate?.slice(0, 4)}
               likes={item.likesCount}
               liked={item.isLiked}
+              voteAverage={item.voteAverage}
+              director={item.director}
               onPress={() => handlePress(item)}
               onToggleLike={() => handleToggleLike(item.id)}
             />
           )}
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
         />
       )}
     </SafeAreaView>
@@ -135,41 +164,94 @@ const LikeListScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff'},
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
   },
   sortContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    padding: 10,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  sortButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  selectedSortButton: {
+    backgroundColor: '#009EFA',
+    borderColor: '#009EFA',
   },
   sortText: {
     fontSize: 14,
-    color: '#888',
-    marginLeft: 16,
+    color: '#666',
+    fontWeight: '600',
   },
-  selectedSort: {
-    color: '#007AFF',
-    fontWeight: 'bold',
+  selectedSortText: {
+    color: '#fff',
   },
   list: {
     padding: 16,
+    paddingBottom: 32,
   },
-  emptyState: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 60,
   },
-  emptyText: {
+  loadingText: {
+    marginTop: 16,
     fontSize: 16,
-    color: '#aaa',
+    color: '#666',
+    fontWeight: '500',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingTop: 60,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
 

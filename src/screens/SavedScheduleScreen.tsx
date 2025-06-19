@@ -105,14 +105,14 @@ const SavedScheduleScreen: React.FC<Props> = ({navigation, route}) => {
       {/* 상단 헤더 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#007AFF" />
+          <Icon name="arrow-back" size={24} color="#009EFA" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {travelPlanName || '저장된 여행 일정'}
-        </Text>{' '}
+        </Text>
         {/* 여기서 제목을 업데이트 */}
         <TouchableOpacity onPress={() => goToMapScreen()}>
-          <Icon name="map" size={24} color="#007AFF" />
+          <Icon name="map" size={24} color="#009EFA" />
         </TouchableOpacity>
       </View>
 
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   },
   selectedTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
+    borderBottomColor: '#009EFA',
   },
   tabText: {
     fontSize: 16,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     paddingVertical: 16,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#009EFA',
     alignItems: 'center',
   },
   saveButtonText: {

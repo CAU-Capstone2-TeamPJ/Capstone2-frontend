@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {getFilmRanking} from '../api/api';
+import {getFilmRanking, getMyTravelPlans} from '../api/api';
 import FilmCard from '../components/FilmCard';
+import SimpleTravelPlanCard from '../components/SimpleTravelCard';
 
 interface Film {
   id: number;
@@ -22,9 +23,22 @@ interface Film {
   director: string;
 }
 
+interface TravelPlan {
+  id: number;
+  name: string;
+  movieTitle: string;
+  totalDays: number;
+  tripDays: {
+    locations: {
+      images: string[];
+    }[];
+  }[];
+}
+
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [filmList, setFilmList] = useState<Film[]>([]);
+  const [travelPlans, setTravelPlans] = useState<TravelPlan[]>([]);
 
   useEffect(() => {
     const fetchRanking = async () => {
@@ -38,6 +52,18 @@ const HomeScreen = () => {
     fetchRanking();
   }, []);
 
+  useEffect(() => {
+    const fetchTravelPlans = async () => {
+      try {
+        const data = await getMyTravelPlans(); // 최신순 정렬 필요 시 서버에서 처리
+        setTravelPlans(data);
+      } catch (err) {
+        console.error('여행 계획 가져오기 실패:', err);
+      }
+    };
+    fetchTravelPlans();
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* 검색창 */}
@@ -49,7 +75,35 @@ const HomeScreen = () => {
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.sectionTitle}>🔥 인기 영화 순위</Text>
+        {/* 최근 여행 계획 섹션 */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>✈️ 최근 여행 계획</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('MyTravels' as never)}
+            style={styles.moreButton}>
+            <Text style={styles.moreText}>더보기</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 최근 여행 계획들 */}
+        <ScrollView
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.travelPlansContainer}>
+          {travelPlans.length === 0 ? (
+            <Text style={styles.noPlansText}>최근 여행 계획이 없습니다.</Text>
+          ) : (
+            [...travelPlans]
+              .sort((a, b) => b.id - a.id) // id 기준 내림차순 정렬
+              .slice(0, 5) // 상위 5개만 추출
+              .map(plan => <SimpleTravelPlanCard key={plan.id} plan={plan} />)
+          )}
+        </ScrollView>
+
+        {/* 인기 영화 순위 */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>🔥 인기 영화 순위</Text>
+        </View>
         {filmList.map((film, index) => (
           <FilmCard key={film.id} film={film} rank={index + 1} />
         ))}
@@ -66,8 +120,9 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    margin: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginHorizontal: 16,
     backgroundColor: '#f2f2f2',
     borderRadius: 8,
   },
@@ -79,11 +134,33 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingBottom: 20,
   },
+  sectionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginVertical: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 16,
-    marginBottom: 12,
+    color: '#333',
+  },
+  moreButton: {
+    padding: 8,
+  },
+  moreText: {
+    color: '#009EFA',
+    fontSize: 16,
+  },
+  travelPlansContainer: {
+    paddingLeft: 16,
+  },
+  noPlansText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
