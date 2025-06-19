@@ -66,14 +66,14 @@ const LoginScreen = () => {
         />
       ) : (
         <>
-          <Image source={require('../assets/logo.png')} style={styles.logo} />
+          <Image source={require('../assets/image.png')} style={styles.logo} />
           <Text style={styles.title}>Start Your Film Voyage!</Text>
-
+          <Text style={styles.appTitle}>FILM VOYAGE </Text>
           <TouchableOpacity
             style={styles.googleButton}
             onPress={signInWithGoogle} // 구글 로그인 버튼 클릭 시 웹뷰로 이동
           >
-            <Text style={styles.googleButtonText}>Google로 시작하기</Text>
+            <Text style={styles.googleButtonText}>Google로 로그인</Text>
           </TouchableOpacity>
         </>
       )}
@@ -90,13 +90,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 200,
+    height: 200,
     marginBottom: 24,
+    borderRadius: 100,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
+    textAlign: 'center',
+  },
+  appTitle: {
+    fontSize: 36,
+    fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 40,
   },
